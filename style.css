@@ -1,4 +1,3 @@
-/* --- ESTILOS GENERALES --- */
 body {
     background-color: #0b0e11;
     color: #ffffff;
@@ -22,7 +21,7 @@ body {
 
 .hidden { display: none !important; }
 
-/* --- PANTALLA DE REGISTRO --- */
+/* Avatar Setup */
 .profile-setup {
     display: flex;
     flex-direction: column;
@@ -63,25 +62,28 @@ body {
 
 #avatar-selector {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 10px;
     background: #0d1117;
-    padding: 10px;
+    padding: 15px;
     border-radius: 12px;
     margin-bottom: 15px;
+    max-height: 250px;
+    overflow-y: auto;
 }
 
 .avatar-opt {
-    width: 50px;
-    height: 50px;
+    width: 60px;
+    height: 60px;
     border-radius: 50%;
     cursor: pointer;
     border: 2px solid transparent;
+    object-fit: cover;
 }
 
 .avatar-opt:hover { border-color: #238636; }
 
-/* --- BOTONES Y INPUTS --- */
+/* Botones e Inputs */
 input {
     width: 85%;
     padding: 12px;
@@ -92,63 +94,33 @@ input {
     color: white;
 }
 
-.double-btn {
-    display: flex;
-    gap: 10px;
-    margin-top: 15px;
-}
+.double-btn { display: flex; gap: 10px; margin-top: 15px; }
 
-button {
-    cursor: pointer;
-    border: none;
-    border-radius: 8px;
-    font-weight: bold;
-    transition: 0.2s;
-}
+button { cursor: pointer; border: none; border-radius: 8px; font-weight: bold; transition: 0.2s; }
 
 .btn-main { background: #238636; color: white; flex: 1; padding: 12px; }
 .btn-secondary { background: #30363d; color: white; flex: 1; padding: 12px; }
+.btn-back { background: #444c56; color: white; padding: 8px 15px; margin-bottom: 15px; font-size: 0.85em; float: left; }
 .btn-upload { background: #444c56; color: white; padding: 10px; width: 100%; margin: 10px 0; }
 .btn-start { background: #238636; color: white; width: 100%; padding: 15px; font-size: 1.1em; }
-.btn-end { background: #da3633; color: white; width: 100%; padding: 12px; }
+.btn-end { background: #da3633; color: white; width: 100%; padding: 12px; width: 100%; }
 .btn-next { background: #1f6feb; color: white; padding: 12px; flex: 1; }
 
-/* --- LOBBY Y JUGADORES --- */
-.lobby-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-#players-list, #vote-grid { display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; margin: 20px 0; }
-
-.player-card {
-    position: relative;
-    background: #30363d;
-    padding: 10px;
-    border-radius: 12px;
-    width: 85px;
-}
-
+/* Lobby */
+.lobby-header { clear: both; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+#players-list, #vote-grid { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin: 20px 0; }
+.player-card { position: relative; background: #30363d; padding: 10px; border-radius: 12px; width: 85px; }
 .player-card img { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; }
 .crown { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); font-size: 22px; }
 .kick-btn { position: absolute; top: 5px; right: 5px; cursor: pointer; color: #da3633; font-weight: bold; }
 
-/* --- JUEGO Y EFECTO GIRO --- */
+/* Juego 3D */
 #game-card-container { perspective: 1000px; margin: 20px auto; width: 280px; height: 320px; }
 #game-card { position: relative; width: 100%; height: 100%; transition: transform 0.8s; transform-style: preserve-3d; }
 #game-card.flipped { transform: rotateY(180deg); }
-
-.card-face {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    backface-visibility: hidden;
-    border-radius: 15px;
-    overflow: hidden;
-    background: #262c36;
-    border: 2px solid #30363d;
-}
-
+.card-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 15px; overflow: hidden; background: #262c36; border: 2px solid #30363d; }
 .card-face.back { transform: rotateY(180deg); }
 .card-face img { width: 100%; height: 85%; object-fit: cover; }
-
 #revelation-zone { margin: 15px 0; padding: 12px; background: rgba(218, 54, 51, 0.2); border: 1px solid #da3633; border-radius: 10px; }
 .player-card.eliminated { opacity: 0.2; filter: grayscale(1); }
 .next-row { display: flex; gap: 10px; align-items: center; margin-top: 10px; }
-#image-stats { font-family: monospace; font-size: 1.1em; }
