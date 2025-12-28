@@ -1,14 +1,14 @@
 /* --- RESET Y ESTILOS GLOBALES --- */
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
+* { 
+    box-sizing: border-box; 
+    margin: 0; 
+    padding: 0; 
 }
 
 body {
     background-color: #0b0e11;
     color: #ffffff;
-    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     display: flex;
     justify-content: center;
     align-items: flex-start;
@@ -27,16 +27,16 @@ body {
     border: 1px solid #30363d;
 }
 
-h1 {
-    font-size: 2.5em;
-    letter-spacing: 3px;
-    color: #f0f6fc;
-    margin-bottom: 20px;
-    text-transform: uppercase;
+h1 { 
+    font-size: 2.5em; 
+    letter-spacing: 3px; 
+    color: #f0f6fc; 
+    margin-bottom: 20px; 
+    text-transform: uppercase; 
 }
 
-.hidden {
-    display: none !important;
+.hidden { 
+    display: none !important; 
 }
 
 hr {
@@ -165,7 +165,7 @@ button {
     border: none;
     border-radius: 8px;
     font-weight: bold;
-    transition: all 0.2s;
+    transition: all 0.4s ease;
 }
 
 .btn-main { background: #238636; color: white; flex: 1; padding: 12px; }
@@ -174,14 +174,14 @@ button {
 .btn-secondary { background: #30363d; color: white; flex: 1; padding: 12px; }
 .btn-secondary:hover { background: #3c444d; }
 
-/* --- ESTADOS DEL BOTÓN DE CARGA --- */
+/* --- ESTADOS DEL BOTÓN DE CARGA (IGUALES EN TAMAÑO) --- */
 .btn-upload-empty {
-    background: transparent;
+    background: #30363d;
     color: #8b949e;
-    border: 2px dashed #444c56;
     padding: 12px;
     width: 100%;
     margin: 10px 0;
+    border: 1px solid #444c56;
 }
 
 .btn-upload-filled {
@@ -190,8 +190,8 @@ button {
     padding: 12px;
     width: 100%;
     margin: 10px 0;
-    border: 2px solid #1f6feb;
-    box-shadow: 0 0 10px rgba(31, 111, 235, 0.4);
+    border: 1px solid #1f6feb;
+    box-shadow: 0 0 15px rgba(31, 111, 235, 0.3);
 }
 
 .btn-start {
@@ -219,10 +219,11 @@ button {
 
 /* BOTÓN DESHABILITADO */
 .disabled-action {
-    background: #30363d !important;
-    color: #6e7681 !important;
+    background: #21262d !important;
+    color: #484f58 !important;
     cursor: not-allowed !important;
-    opacity: 0.5;
+    opacity: 0.6;
+    box-shadow: none !important;
 }
 
 /* --- LOBBY Y JUGADORES --- */

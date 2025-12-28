@@ -11,9 +11,9 @@ let currentUser = {
 
 let roomData = { pass: '', players: {}, photoQueue: [], currentIndex: 0, status: 'lobby', impostorId: '', revealed: false };
 
-// --- SELECTOR DE AVATARES ---
+// --- GENERADOR DE AVATARES ---
 const selector = document.getElementById('avatar-selector');
-const extensions = ['jpg', 'png', 'jpeg'];
+const extensions = ['jpg', 'png', 'jpeg', 'JPG', 'PNG'];
 for (let i = 1; i <= 13; i++) {
     const img = document.createElement('img');
     img.className = 'avatar-opt';
@@ -41,24 +41,20 @@ window.goBack = () => {
     location.reload();
 };
 
-// --- ACCESO A SALA (CON VALIDACIÓN DE DUPLICADOS) ---
+// --- ACCESO A SALA ---
 async function accessRoom(isCreating) {
     const pass = document.getElementById('room-pass').value;
     const nick = document.getElementById('nickname').value;
-    if (!nick || pass.length < 4) return alert("Completa Nick y Contraseña (min 4)");
+    if (!nick || pass.length < 4) return alert("Completa Nick y Pass (min 4)");
 
     const roomRef = window.fb.ref(window.fb.db, 'rooms/' + pass);
     const snapshot = await window.fb.get(roomRef);
 
     if (isCreating) {
-        if (snapshot.exists()) {
-            return alert("Esta sala ya existe. Elige otra contraseña o únete a ella.");
-        }
+        if (snapshot.exists()) return alert("Esta sala ya existe. Elige otra contraseña.");
         await window.fb.set(roomRef, { pass, status: 'lobby', currentIndex: 0, revealed: false, photoQueue: ["none"] });
     } else {
-        if (!snapshot.exists()) {
-            return alert("La sala no existe.");
-        }
+        if (!snapshot.exists()) return alert("La sala no existe.");
     }
 
     currentUser.nick = nick;
@@ -131,7 +127,6 @@ function renderGame() {
         document.getElementById('revelation-zone').classList.remove('hidden');
         document.getElementById('impostor-announcement').innerText = `EL IMPOSTOR ERA: ${roomData.players[roomData.impostorId]?.nick}`;
         
-        // Habilitar botón siguiente solo tras revelar
         if (currentUser.isHost) {
             btnNext.disabled = false;
             btnNext.classList.remove('disabled-action');
@@ -140,7 +135,6 @@ function renderGame() {
         card.classList.remove('flipped');
         document.getElementById('revelation-zone').classList.add('hidden');
         
-        // Bloquear botón siguiente al inicio de ronda
         if (currentUser.isHost) {
             btnNext.disabled = true;
             btnNext.classList.add('disabled-action');
@@ -168,21 +162,24 @@ function renderVotes() {
 
 window.kick = (id) => window.fb.remove(window.fb.ref(window.fb.db, `rooms/${roomData.pass}/players/${id}`));
 
-// --- CARGA DE FOTO LIMITADA A UNA ---
+// --- CARGA DE FOTO ---
 document.getElementById('game-photo').addEventListener('change', async (e) => {
-    if (currentUser.hasUploaded) return alert("Ya has cargado tu foto para esta ronda.");
-    
+    if (currentUser.hasUploaded) return alert("Ya has cargado tu foto.");
     const f = e.target.files[0];
     if (!f) return;
 
     const r = new FileReader();
     r.onload = async (ev) => {
         const photoData = ev.target.result;
-        const currentQueue = (roomData.photoQueue || []).filter(x => x !== "none");
+        const roomRef = window.fb.ref(window.fb.db, 'rooms/' + roomData.pass);
         
-        await window.fb.update(window.fb.ref(window.fb.db, 'rooms/' + roomData.pass), { 
-            photoQueue: [...currentQueue, photoData] 
-        });
+        // Obtenemos cola actual para evitar desincronización en PC
+        const snap = await window.fb.get(window.fb.ref(window.fb.db, 'rooms/' + roomData.pass + '/photoQueue'));
+        let queue = snap.val() || [];
+        queue = queue.filter(x => x !== "none");
+        queue.push(photoData);
+        
+        await window.fb.update(roomRef, { photoQueue: queue });
 
         currentUser.hasUploaded = true;
         const btnUp = document.getElementById('btn-upload-ui');
@@ -192,11 +189,13 @@ document.getElementById('game-photo').addEventListener('change', async (e) => {
     r.readAsDataURL(f);
 });
 
-window.startGame = () => {
-    const q = (roomData.photoQueue||[]).filter(x=>x!=="none");
-    if (q.length === 0) return alert("No hay fotos cargadas.");
+window.startGame = async () => {
+    const queue = (roomData.photoQueue||[]).filter(x=>x!=="none");
+    if (queue.length === 0) return alert("No hay fotos.");
     const p = Object.values(roomData.players);
-    window.fb.update(window.fb.ref(window.fb.db, 'rooms/' + roomData.pass), { 
+    
+    // IMPORTANTE: Resetear revealed a false al empezar
+    await window.fb.update(window.fb.ref(window.fb.db, 'rooms/' + roomData.pass), { 
         status: 'playing', 
         impostorId: p[Math.floor(Math.random() * p.length)].id, 
         revealed: false,
@@ -206,16 +205,15 @@ window.startGame = () => {
 
 window.revealImpostor = () => window.fb.update(window.fb.ref(window.fb.db, 'rooms/' + roomData.pass), { revealed: true });
 
-window.nextImage = () => {
-    const q = (roomData.photoQueue||[]).filter(x=>x!=="none");
-    if (roomData.currentIndex < q.length - 1) {
+window.nextImage = async () => {
+    const queue = (roomData.photoQueue||[]).filter(x=>x!=="none");
+    if (roomData.currentIndex < queue.length - 1) {
         const p = Object.values(roomData.players);
-        window.fb.update(window.fb.ref(window.fb.db, 'rooms/' + roomData.pass), { 
+        // IMPORTANTE: Resetear revealed a false al pasar de foto
+        await window.fb.update(window.fb.ref(window.fb.db, 'rooms/' + roomData.pass), { 
             currentIndex: roomData.currentIndex + 1, 
             revealed: false, 
             impostorId: p[Math.floor(Math.random() * p.length)].id 
         });
-    } else {
-        alert("No hay más fotos.");
     }
 };
