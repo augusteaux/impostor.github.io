@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Impostor Game</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+        <section id="setup-screen">
+            <h1>Impostor Game</h1>
+            
+            <div class="profile-setup">
+                <div class="avatar-container" onclick="toggleAvatarSelector()">
+                    <img id="current-avatar" src="foto/1.png" alt="Avatar">
+                    <div class="edit-badge">✎</div>
+                </div>
+                <div id="avatar-selector" class="hidden"></div>
+                <input type="text" id="nickname" placeholder="Tu Nickname">
+            </div>
+
+            <div class="actions">
+                <div class="box">
+                    <input type="password" id="room-pass" placeholder="Contraseña de la sala">
+                    <div class="double-btn">
+                        <button class="btn-main" onclick="accessRoom(true)">Crear Sala</button>
+                        <button class="btn-secondary" onclick="accessRoom(false)">Unirse</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="lobby-screen" class="hidden">
+            <div class="lobby-header">
+                <h2>Sala: <span id="display-pass"></span></h2>
+                <div id="player-counter">Jugadores: 0</div>
+            </div>
+
+            <div id="players-list"></div>
+            
+            <hr>
+
+            <div class="upload-zone">
+                <h3>Preparar Partida</h3>
+                <input type="file" id="game-photo" accept="image/*" style="display:none" multiple>
+                <button class="btn-upload" onclick="document.getElementById('game-photo').click()">Cargar Foto de la Ronda</button>
+                <input type="text" id="photo-name" placeholder="Nombre de esta imagen">
+                <div id="queue-count">Fotos en cola: 0</div>
+            </div>
+
+            <div id="host-controls" class="hidden">
+                <button class="btn-start" onclick="startGame()">EMPEZAR JUEGO</button>
+                <p class="host-badge">👑 Eres el Host</p>
+            </div>
+            
+            <p id="waiting-msg">Esperando al administrador...</p>
+        </section>
+
+        <section id="game-screen" class="hidden">
+            <h2 id="role-text"></h2>
+            
+            <div id="game-card-container">
+                <div id="game-card">
+                    <div class="card-face front">
+                        <img id="target-image" src="" alt="Juego">
+                        <p id="target-name"></p>
+                    </div>
+                    <div class="card-face back">
+                        <img id="reveal-image" src="" alt="Original">
+                        <p>FOTO REAL</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="revelation-zone" class="hidden">
+                <h3 id="impostor-announcement"></h3>
+            </div>
+
+            <div id="voting-zone">
+                <div id="vote-grid"></div>
+            </div>
+
+            <div id="admin-game-actions" class="hidden">
+                <button class="btn-end" id="btn-reveal" onclick="revealImpostor()">TERMINAR</button>
+                <div class="next-row">
+                    <button class="btn-next" onclick="nextImage()">Siguiente Imagen</button>
+                    <span id="image-stats">0/0</span>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
