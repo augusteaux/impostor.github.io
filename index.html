@@ -10,14 +10,13 @@
 
     <div class="container">
         <section id="setup-screen">
-            <h1>Impostor Game</h1>
+            <h1>Impostor</h1>
             <div class="profile-setup">
                 <div class="avatar-container" onclick="toggleAvatarSelector()">
                     <img id="current-avatar" src="foto/1.jpg" alt="Avatar">
                     <div class="edit-badge">✎</div>
                 </div>
-                <div id="avatar-selector" class="hidden">
-                    </div>
+                <div id="avatar-selector" class="hidden"></div>
                 <input type="text" id="nickname" placeholder="Tu Nickname">
             </div>
             <div class="actions">
@@ -33,7 +32,7 @@
 
         <section id="lobby-screen" class="hidden">
             <div class="nav-header">
-                <button class="btn-back" onclick="goBack()">← Volver al Menú</button>
+                <button class="btn-back" onclick="goBack()">← Volver</button>
             </div>
             <div class="lobby-header">
                 <h2>Sala: <span id="display-pass"></span></h2>
@@ -43,20 +42,20 @@
             <hr>
             <div class="upload-zone">
                 <h3>Preparar Partida</h3>
-                <input type="file" id="game-photo" accept="image/*" style="display:none" multiple>
-                <button class="btn-upload" onclick="document.getElementById('game-photo').click()">Cargar Foto de la Ronda</button>
-                <div id="queue-count">Fotos en cola: 0</div>
+                <input type="file" id="game-photo" accept="image/*" style="display:none">
+                <button id="btn-upload-ui" class="btn-upload-empty" onclick="document.getElementById('game-photo').click()">Cargar Foto de la Ronda</button>
+                <div id="queue-count">Fotos cargadas: 0</div>
             </div>
             <div id="host-controls" class="hidden">
                 <button class="btn-start" onclick="startGame()">EMPEZAR JUEGO</button>
-                <p class="host-badge">👑 Eres el Host</p>
+                <p class="host-badge">👑 Host</p>
             </div>
             <p id="waiting-msg">Esperando al administrador...</p>
         </section>
 
         <section id="game-screen" class="hidden">
             <div class="nav-header">
-                <button class="btn-back" onclick="goBack()">← Salir de la Sala</button>
+                <button class="btn-back" onclick="goBack()">← Salir</button>
             </div>
             <h2 id="role-text"></h2>
             <div id="game-card-container">
@@ -78,7 +77,7 @@
             <div id="admin-game-actions" class="hidden">
                 <button class="btn-end" onclick="revealImpostor()">TERMINAR</button>
                 <div class="next-row">
-                    <button class="btn-next" onclick="nextImage()">Siguiente Imagen</button>
+                    <button id="btn-next-img" class="btn-next disabled-action" onclick="nextImage()" disabled>Siguiente Imagen</button>
                     <span id="image-stats">0/0</span>
                 </div>
             </div>
@@ -87,7 +86,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, set, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, set, onValue, update, remove, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyA8Z0_JxnYHeeiILEROc_lXn67XD5SQnoc",
@@ -102,7 +101,7 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-        window.fb = { db, ref, set, onValue, update, remove };
+        window.fb = { db, ref, set, onValue, update, remove, get };
     </script>
     <script src="script.js"></script>
 </body>

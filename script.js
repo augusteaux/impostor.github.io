@@ -5,19 +5,18 @@ let currentUser = {
     nick: '', 
     photo: '', 
     isHost: false, 
-    id: Math.random().toString(36).substr(2, 9) 
+    id: Math.random().toString(36).substr(2, 9),
+    hasUploaded: false 
 };
 
 let roomData = { pass: '', players: {}, photoQueue: [], currentIndex: 0, status: 'lobby', impostorId: '', revealed: false };
 
-// --- GENERADOR DE AVATARES (1-13 con extensiones mixtas y manejo de errores) ---
+// --- SELECTOR DE AVATARES ---
 const selector = document.getElementById('avatar-selector');
-const extensions = ['jpg', 'png', 'jpeg', 'JPG', 'PNG'];
-
+const extensions = ['jpg', 'png', 'jpeg'];
 for (let i = 1; i <= 13; i++) {
     const img = document.createElement('img');
     img.className = 'avatar-opt';
-    
     let extIdx = 0;
     const tryLoad = () => {
         if (extIdx < extensions.length) {
@@ -25,10 +24,8 @@ for (let i = 1; i <= 13; i++) {
             extIdx++;
         }
     };
-    
     img.onerror = tryLoad;
     tryLoad();
-
     img.onclick = () => {
         currentUser.photo = img.src;
         document.getElementById('current-avatar').src = img.src;
@@ -36,53 +33,40 @@ for (let i = 1; i <= 13; i++) {
     };
     selector.appendChild(img);
 }
-
-// Fallback por si la primera imagen no carga al inicio
-setTimeout(() => { 
-    const firstAvatar = document.querySelector('.avatar-opt');
-    if(firstAvatar && !currentUser.photo) {
-        currentUser.photo = firstAvatar.src;
-        document.getElementById('current-avatar').src = firstAvatar.src;
-    }
-}, 1500);
-
 window.toggleAvatarSelector = () => selector.classList.toggle('hidden');
 
 // --- NAVEGACIÓN ---
 window.goBack = () => {
-    if (roomData.pass && roomData.players[currentUser.id]) {
-        window.fb.remove(window.fb.ref(window.fb.db, `rooms/${roomData.pass}/players/${currentUser.id}`));
-    }
+    if (roomData.pass) window.fb.remove(window.fb.ref(window.fb.db, `rooms/${roomData.pass}/players/${currentUser.id}`));
     location.reload();
 };
 
-// --- LOGICA DE SALA ---
+// --- ACCESO A SALA (CON VALIDACIÓN DE DUPLICADOS) ---
 async function accessRoom(isCreating) {
     const pass = document.getElementById('room-pass').value;
     const nick = document.getElementById('nickname').value;
     if (!nick || pass.length < 4) return alert("Completa Nick y Contraseña (min 4)");
 
+    const roomRef = window.fb.ref(window.fb.db, 'rooms/' + pass);
+    const snapshot = await window.fb.get(roomRef);
+
+    if (isCreating) {
+        if (snapshot.exists()) {
+            return alert("Esta sala ya existe. Elige otra contraseña o únete a ella.");
+        }
+        await window.fb.set(roomRef, { pass, status: 'lobby', currentIndex: 0, revealed: false, photoQueue: ["none"] });
+    } else {
+        if (!snapshot.exists()) {
+            return alert("La sala no existe.");
+        }
+    }
+
     currentUser.nick = nick;
     currentUser.isHost = isCreating;
     roomData.pass = pass;
 
-    const roomRef = window.fb.ref(window.fb.db, 'rooms/' + pass);
-    if (isCreating) {
-        await window.fb.set(roomRef, { 
-            pass, 
-            status: 'lobby', 
-            currentIndex: 0, 
-            revealed: false, 
-            photoQueue: ["none"] 
-        });
-    }
-
     await window.fb.set(window.fb.ref(window.fb.db, `rooms/${pass}/players/${currentUser.id}`), {
-        nick: currentUser.nick, 
-        photo: currentUser.photo, 
-        isHost: currentUser.isHost, 
-        id: currentUser.id, 
-        eliminated: false
+        nick: currentUser.nick, photo: currentUser.photo, isHost: currentUser.isHost, id: currentUser.id, eliminated: false
     });
 
     listenToRoom(pass);
@@ -113,27 +97,19 @@ function updateUI() {
         const players = Object.values(roomData.players || {});
         document.getElementById('player-counter').innerText = `Jugadores: ${players.length}`;
         
+        const qCount = (roomData.photoQueue || []).filter(p => p !== "none").length;
+        document.getElementById('queue-count').innerText = `Fotos cargadas: ${qCount}`;
+
         const list = document.getElementById('players-list');
         list.innerHTML = "";
         players.forEach(p => {
             const card = document.createElement('div');
             card.className = "player-card";
-            card.innerHTML = `
-                ${p.isHost?'<span class="crown">👑</span>':''}
-                ${currentUser.isHost && p.id!==currentUser.id?`<span class="kick-btn" onclick="kick('${p.id}')">⋮</span>`:''}
-                <img src="${p.photo}">
-                <p>${p.nick}</p>
-            `;
+            card.innerHTML = `${p.isHost?'<span class="crown">👑</span>':''}${currentUser.isHost && p.id!==currentUser.id?`<span class="kick-btn" onclick="kick('${p.id}')">⋮</span>`:''}<img src="${p.photo}"><p>${p.nick}</p>`;
             list.appendChild(card);
         });
 
-        if (currentUser.isHost) {
-            document.getElementById('host-controls').classList.remove('hidden');
-            document.getElementById('waiting-msg').classList.add('hidden');
-        } else {
-            document.getElementById('host-controls').classList.add('hidden');
-            document.getElementById('waiting-msg').classList.remove('hidden');
-        }
+        if (currentUser.isHost) document.getElementById('host-controls').classList.remove('hidden');
     }
 }
 
@@ -146,16 +122,29 @@ function renderGame() {
     document.getElementById('target-image').src = isImp ? IMPOSTOR_PATH : photo;
     document.getElementById('reveal-image').src = photo;
     document.getElementById('role-text').innerText = isImp ? "ERES EL IMPOSTOR" : "ERES TRIPULANTE";
-    document.getElementById('role-text').style.color = isImp ? "#da3633" : "#1f6feb";
     
     const card = document.getElementById('game-card');
+    const btnNext = document.getElementById('btn-next-img');
+
     if (roomData.revealed) {
         if (isImp) card.classList.add('flipped');
         document.getElementById('revelation-zone').classList.remove('hidden');
         document.getElementById('impostor-announcement').innerText = `EL IMPOSTOR ERA: ${roomData.players[roomData.impostorId]?.nick}`;
+        
+        // Habilitar botón siguiente solo tras revelar
+        if (currentUser.isHost) {
+            btnNext.disabled = false;
+            btnNext.classList.remove('disabled-action');
+        }
     } else {
         card.classList.remove('flipped');
         document.getElementById('revelation-zone').classList.add('hidden');
+        
+        // Bloquear botón siguiente al inicio de ronda
+        if (currentUser.isHost) {
+            btnNext.disabled = true;
+            btnNext.classList.add('disabled-action');
+        }
     }
     
     renderVotes();
@@ -179,25 +168,39 @@ function renderVotes() {
 
 window.kick = (id) => window.fb.remove(window.fb.ref(window.fb.db, `rooms/${roomData.pass}/players/${id}`));
 
+// --- CARGA DE FOTO LIMITADA A UNA ---
 document.getElementById('game-photo').addEventListener('change', async (e) => {
-    const photos = [];
-    for (const f of e.target.files) {
-        const r = new FileReader();
-        const p = new Promise(res => r.onload = ev => res(ev.target.result));
-        r.readAsDataURL(f);
-        photos.push(await p);
-    }
-    window.fb.update(window.fb.ref(window.fb.db, 'rooms/' + roomData.pass), { photoQueue: [...(roomData.photoQueue||[]).filter(x=>x!=="none"), ...photos] });
+    if (currentUser.hasUploaded) return alert("Ya has cargado tu foto para esta ronda.");
+    
+    const f = e.target.files[0];
+    if (!f) return;
+
+    const r = new FileReader();
+    r.onload = async (ev) => {
+        const photoData = ev.target.result;
+        const currentQueue = (roomData.photoQueue || []).filter(x => x !== "none");
+        
+        await window.fb.update(window.fb.ref(window.fb.db, 'rooms/' + roomData.pass), { 
+            photoQueue: [...currentQueue, photoData] 
+        });
+
+        currentUser.hasUploaded = true;
+        const btnUp = document.getElementById('btn-upload-ui');
+        btnUp.className = "btn-upload-filled";
+        btnUp.innerText = "¡Foto Cargada!";
+    };
+    r.readAsDataURL(f);
 });
 
 window.startGame = () => {
-    const p = Object.values(roomData.players);
     const q = (roomData.photoQueue||[]).filter(x=>x!=="none");
-    if (q.length === 0) return alert("Carga fotos primero");
+    if (q.length === 0) return alert("No hay fotos cargadas.");
+    const p = Object.values(roomData.players);
     window.fb.update(window.fb.ref(window.fb.db, 'rooms/' + roomData.pass), { 
         status: 'playing', 
         impostorId: p[Math.floor(Math.random() * p.length)].id, 
-        revealed: false 
+        revealed: false,
+        currentIndex: 0
     });
 };
 
@@ -212,5 +215,7 @@ window.nextImage = () => {
             revealed: false, 
             impostorId: p[Math.floor(Math.random() * p.length)].id 
         });
+    } else {
+        alert("No hay más fotos.");
     }
 };

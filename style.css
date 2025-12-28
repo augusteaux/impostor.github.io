@@ -1,10 +1,18 @@
+/* --- RESET Y ESTILOS GLOBALES --- */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
 body {
     background-color: #0b0e11;
     color: #ffffff;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     display: flex;
     justify-content: center;
-    margin: 0;
+    align-items: flex-start;
+    min-height: 100vh;
     padding: 20px;
 }
 
@@ -19,9 +27,25 @@ body {
     border: 1px solid #30363d;
 }
 
-.hidden { display: none !important; }
+h1 {
+    font-size: 2.5em;
+    letter-spacing: 3px;
+    color: #f0f6fc;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+}
 
-/* Botón Volver Mejorado */
+.hidden {
+    display: none !important;
+}
+
+hr {
+    border: 0;
+    border-top: 1px solid #30363d;
+    margin: 20px 0;
+}
+
+/* --- NAVEGACIÓN (BOTÓN VOLVER) --- */
 .nav-header {
     display: flex;
     justify-content: flex-start;
@@ -36,11 +60,14 @@ body {
     font-size: 0.85em;
     border: none;
     cursor: pointer;
+    transition: background 0.2s;
 }
 
-.btn-back:hover { background: #57606a; }
+.btn-back:hover {
+    background: #57606a;
+}
 
-/* Avatar Setup */
+/* --- PERFIL Y SELECTOR DE AVATARES --- */
 .profile-setup {
     display: flex;
     flex-direction: column;
@@ -99,14 +126,18 @@ body {
     cursor: pointer;
     border: 2px solid transparent;
     object-fit: cover;
+    transition: border 0.2s;
 }
 
-.avatar-opt:hover { border-color: #238636; }
+.avatar-opt:hover {
+    border-color: #238636;
+}
 
-/* Botones e Inputs */
-input {
-    width: 85%;
-    padding: 12px;
+/* --- INPUTS Y CAJAS --- */
+input[type="text"], 
+input[type="password"] {
+    width: 90%;
+    padding: 12px 15px;
     margin: 8px 0;
     border-radius: 8px;
     border: 1px solid #30363d;
@@ -115,33 +146,228 @@ input {
     font-size: 16px;
 }
 
-.double-btn { display: flex; gap: 10px; margin-top: 15px; }
+.box {
+    background: #21262d;
+    padding: 20px;
+    border-radius: 12px;
+    margin-top: 10px;
+}
 
-button { cursor: pointer; border: none; border-radius: 8px; font-weight: bold; transition: 0.2s; }
+.double-btn {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+/* --- BOTONES PRINCIPALES --- */
+button {
+    cursor: pointer;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    transition: all 0.2s;
+}
 
 .btn-main { background: #238636; color: white; flex: 1; padding: 12px; }
+.btn-main:hover { background: #2ea043; }
+
 .btn-secondary { background: #30363d; color: white; flex: 1; padding: 12px; }
-.btn-upload { background: #30363d; color: white; padding: 12px; width: 100%; margin: 10px 0; border: 1px dashed #444c56; }
-.btn-start { background: #238636; color: white; width: 100%; padding: 15px; font-size: 1.1em; }
-.btn-end { background: #da3633; color: white; width: 100%; padding: 12px; width: 100%; }
-.btn-next { background: #1f6feb; color: white; padding: 12px; flex: 1; }
+.btn-secondary:hover { background: #3c444d; }
 
-/* Lobby */
-.lobby-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-#players-list, #vote-grid { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin: 20px 0; }
-.player-card { position: relative; background: #30363d; padding: 10px; border-radius: 12px; width: 85px; }
-.player-card img { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; }
-.crown { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); font-size: 22px; }
-.kick-btn { position: absolute; top: 5px; right: 5px; cursor: pointer; color: #da3633; font-weight: bold; }
+/* --- ESTADOS DEL BOTÓN DE CARGA --- */
+.btn-upload-empty {
+    background: transparent;
+    color: #8b949e;
+    border: 2px dashed #444c56;
+    padding: 12px;
+    width: 100%;
+    margin: 10px 0;
+}
 
-/* Juego 3D */
-#game-card-container { perspective: 1000px; margin: 20px auto; width: 280px; height: 320px; }
-#game-card { position: relative; width: 100%; height: 100%; transition: transform 0.8s; transform-style: preserve-3d; }
-#game-card.flipped { transform: rotateY(180deg); }
-.card-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 15px; overflow: hidden; background: #262c36; border: 2px solid #30363d; }
-.card-face.back { transform: rotateY(180deg); }
-.card-face img { width: 100%; height: 85%; object-fit: cover; }
-#revelation-zone { margin: 15px 0; padding: 12px; background: rgba(218, 54, 51, 0.2); border: 1px solid #da3633; border-radius: 10px; }
-.player-card.eliminated { opacity: 0.2; filter: grayscale(1); }
-.next-row { display: flex; gap: 10px; align-items: center; margin-top: 10px; }
-#image-stats { font-weight: bold; }
+.btn-upload-filled {
+    background: #1f6feb;
+    color: white;
+    padding: 12px;
+    width: 100%;
+    margin: 10px 0;
+    border: 2px solid #1f6feb;
+    box-shadow: 0 0 10px rgba(31, 111, 235, 0.4);
+}
+
+.btn-start {
+    background: #238636;
+    color: white;
+    width: 100%;
+    padding: 15px;
+    font-size: 1.1em;
+    margin-top: 15px;
+}
+
+.btn-end {
+    background: #da3633;
+    color: white;
+    width: 100%;
+    padding: 12px;
+}
+
+.btn-next {
+    background: #1f6feb;
+    color: white;
+    padding: 12px;
+    flex: 1;
+}
+
+/* BOTÓN DESHABILITADO */
+.disabled-action {
+    background: #30363d !important;
+    color: #6e7681 !important;
+    cursor: not-allowed !important;
+    opacity: 0.5;
+}
+
+/* --- LOBBY Y JUGADORES --- */
+.lobby-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+#player-counter {
+    background: #0d1117;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+}
+
+#players-list, #vote-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+    margin: 20px 0;
+}
+
+.player-card {
+    position: relative;
+    background: #30363d;
+    padding: 12px 10px;
+    border-radius: 12px;
+    width: 85px;
+}
+
+.player-card img {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.crown {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 22px;
+}
+
+.kick-btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    cursor: pointer;
+    color: #f85149;
+    font-weight: bold;
+}
+
+.host-badge {
+    color: #e3b341;
+    font-weight: bold;
+    margin-top: 10px;
+    font-size: 0.9em;
+}
+
+.player-card.eliminated {
+    opacity: 0.2;
+    filter: grayscale(1);
+    transform: scale(0.9);
+}
+
+/* --- PANTALLA DE JUEGO (REVELACIÓN 3D) --- */
+#game-card-container {
+    perspective: 1000px;
+    margin: 20px auto;
+    width: 280px;
+    height: 320px;
+}
+
+#game-card {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-style: preserve-3d;
+}
+
+#game-card.flipped {
+    transform: rotateY(180deg);
+}
+
+.card-face {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    border-radius: 15px;
+    overflow: hidden;
+    background: #262c36;
+    border: 3px solid #30363d;
+}
+
+.card-face.back {
+    transform: rotateY(180deg);
+    border-color: #238636;
+}
+
+.card-face img {
+    width: 100%;
+    height: 85%;
+    object-fit: cover;
+}
+
+.card-face p {
+    height: 15%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 0.9em;
+}
+
+#revelation-zone {
+    margin: 20px 0;
+    padding: 12px;
+    background: rgba(248, 81, 73, 0.15);
+    border: 1px solid #f85149;
+    border-radius: 10px;
+}
+
+#impostor-announcement {
+    color: #ff7b72;
+    font-size: 1.1em;
+}
+
+.next-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-top: 10px;
+}
+
+#image-stats {
+    background: #0d1117;
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-family: monospace;
+    border: 1px solid #30363d;
+}
