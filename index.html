@@ -32,7 +32,9 @@
         </section>
 
         <section id="lobby-screen" class="hidden">
-            <button class="btn-back" onclick="goBack()">← Volver al Menú</button>
+            <div class="nav-header">
+                <button class="btn-back" onclick="goBack()">← Volver al Menú</button>
+            </div>
             <div class="lobby-header">
                 <h2>Sala: <span id="display-pass"></span></h2>
                 <div id="player-counter">Jugadores: 0</div>
@@ -53,7 +55,9 @@
         </section>
 
         <section id="game-screen" class="hidden">
-            <button class="btn-back" onclick="goBack()">← Salir de la Sala</button>
+            <div class="nav-header">
+                <button class="btn-back" onclick="goBack()">← Salir de la Sala</button>
+            </div>
             <h2 id="role-text"></h2>
             <div id="game-card-container">
                 <div id="game-card">

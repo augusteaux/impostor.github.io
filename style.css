@@ -1,7 +1,7 @@
 body {
     background-color: #0b0e11;
     color: #ffffff;
-    font-family: 'Segoe UI', sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     display: flex;
     justify-content: center;
     margin: 0;
@@ -20,6 +20,25 @@ body {
 }
 
 .hidden { display: none !important; }
+
+/* Botón Volver Mejorado */
+.nav-header {
+    display: flex;
+    justify-content: flex-start;
+    margin-bottom: 15px;
+}
+
+.btn-back {
+    background: #444c56;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-size: 0.85em;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-back:hover { background: #57606a; }
 
 /* Avatar Setup */
 .profile-setup {
@@ -70,6 +89,7 @@ body {
     margin-bottom: 15px;
     max-height: 250px;
     overflow-y: auto;
+    border: 1px solid #30363d;
 }
 
 .avatar-opt {
@@ -92,6 +112,7 @@ input {
     border: 1px solid #30363d;
     background: #0d1117;
     color: white;
+    font-size: 16px;
 }
 
 .double-btn { display: flex; gap: 10px; margin-top: 15px; }
@@ -100,14 +121,13 @@ button { cursor: pointer; border: none; border-radius: 8px; font-weight: bold; t
 
 .btn-main { background: #238636; color: white; flex: 1; padding: 12px; }
 .btn-secondary { background: #30363d; color: white; flex: 1; padding: 12px; }
-.btn-back { background: #444c56; color: white; padding: 8px 15px; margin-bottom: 15px; font-size: 0.85em; float: left; }
-.btn-upload { background: #444c56; color: white; padding: 10px; width: 100%; margin: 10px 0; }
+.btn-upload { background: #30363d; color: white; padding: 12px; width: 100%; margin: 10px 0; border: 1px dashed #444c56; }
 .btn-start { background: #238636; color: white; width: 100%; padding: 15px; font-size: 1.1em; }
 .btn-end { background: #da3633; color: white; width: 100%; padding: 12px; width: 100%; }
 .btn-next { background: #1f6feb; color: white; padding: 12px; flex: 1; }
 
 /* Lobby */
-.lobby-header { clear: both; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.lobby-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
 #players-list, #vote-grid { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin: 20px 0; }
 .player-card { position: relative; background: #30363d; padding: 10px; border-radius: 12px; width: 85px; }
 .player-card img { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; }
@@ -124,3 +144,4 @@ button { cursor: pointer; border: none; border-radius: 8px; font-weight: bold; t
 #revelation-zone { margin: 15px 0; padding: 12px; background: rgba(218, 54, 51, 0.2); border: 1px solid #da3633; border-radius: 10px; }
 .player-card.eliminated { opacity: 0.2; filter: grayscale(1); }
 .next-row { display: flex; gap: 10px; align-items: center; margin-top: 10px; }
+#image-stats { font-weight: bold; }

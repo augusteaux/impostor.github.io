@@ -10,9 +10,9 @@ let currentUser = {
 
 let roomData = { pass: '', players: {}, photoQueue: [], currentIndex: 0, status: 'lobby', impostorId: '', revealed: false };
 
-// --- GENERADOR DE AVATARES (1-13 con extensiones mixtas) ---
+// --- GENERADOR DE AVATARES (1-13 con extensiones mixtas y manejo de errores) ---
 const selector = document.getElementById('avatar-selector');
-const extensions = ['jpg', 'png', 'jpeg'];
+const extensions = ['jpg', 'png', 'jpeg', 'JPG', 'PNG'];
 
 for (let i = 1; i <= 13; i++) {
     const img = document.createElement('img');
@@ -25,6 +25,7 @@ for (let i = 1; i <= 13; i++) {
             extIdx++;
         }
     };
+    
     img.onerror = tryLoad;
     tryLoad();
 
@@ -36,14 +37,20 @@ for (let i = 1; i <= 13; i++) {
     selector.appendChild(img);
 }
 
-// Fallback inicial
-setTimeout(() => { if(!currentUser.photo) currentUser.photo = document.getElementById('current-avatar').src; }, 1000);
+// Fallback por si la primera imagen no carga al inicio
+setTimeout(() => { 
+    const firstAvatar = document.querySelector('.avatar-opt');
+    if(firstAvatar && !currentUser.photo) {
+        currentUser.photo = firstAvatar.src;
+        document.getElementById('current-avatar').src = firstAvatar.src;
+    }
+}, 1500);
 
 window.toggleAvatarSelector = () => selector.classList.toggle('hidden');
 
 // --- NAVEGACIÓN ---
 window.goBack = () => {
-    if (roomData.pass) {
+    if (roomData.pass && roomData.players[currentUser.id]) {
         window.fb.remove(window.fb.ref(window.fb.db, `rooms/${roomData.pass}/players/${currentUser.id}`));
     }
     location.reload();
@@ -61,11 +68,21 @@ async function accessRoom(isCreating) {
 
     const roomRef = window.fb.ref(window.fb.db, 'rooms/' + pass);
     if (isCreating) {
-        await window.fb.set(roomRef, { pass, status: 'lobby', currentIndex: 0, revealed: false, photoQueue: ["none"] });
+        await window.fb.set(roomRef, { 
+            pass, 
+            status: 'lobby', 
+            currentIndex: 0, 
+            revealed: false, 
+            photoQueue: ["none"] 
+        });
     }
 
     await window.fb.set(window.fb.ref(window.fb.db, `rooms/${pass}/players/${currentUser.id}`), {
-        nick: currentUser.nick, photo: currentUser.photo, isHost: currentUser.isHost, id: currentUser.id, eliminated: false
+        nick: currentUser.nick, 
+        photo: currentUser.photo, 
+        isHost: currentUser.isHost, 
+        id: currentUser.id, 
+        eliminated: false
     });
 
     listenToRoom(pass);
@@ -101,13 +118,21 @@ function updateUI() {
         players.forEach(p => {
             const card = document.createElement('div');
             card.className = "player-card";
-            card.innerHTML = `${p.isHost?'<span class="crown">👑</span>':''}${currentUser.isHost && p.id!==currentUser.id?`<span class="kick-btn" onclick="kick('${p.id}')">⋮</span>`:''}<img src="${p.photo}"><p>${p.nick}</p>`;
+            card.innerHTML = `
+                ${p.isHost?'<span class="crown">👑</span>':''}
+                ${currentUser.isHost && p.id!==currentUser.id?`<span class="kick-btn" onclick="kick('${p.id}')">⋮</span>`:''}
+                <img src="${p.photo}">
+                <p>${p.nick}</p>
+            `;
             list.appendChild(card);
         });
 
         if (currentUser.isHost) {
             document.getElementById('host-controls').classList.remove('hidden');
             document.getElementById('waiting-msg').classList.add('hidden');
+        } else {
+            document.getElementById('host-controls').classList.add('hidden');
+            document.getElementById('waiting-msg').classList.remove('hidden');
         }
     }
 }
@@ -168,7 +193,7 @@ document.getElementById('game-photo').addEventListener('change', async (e) => {
 window.startGame = () => {
     const p = Object.values(roomData.players);
     const q = (roomData.photoQueue||[]).filter(x=>x!=="none");
-    if (q.length === 0) return alert("Carga fotos");
+    if (q.length === 0) return alert("Carga fotos primero");
     window.fb.update(window.fb.ref(window.fb.db, 'rooms/' + roomData.pass), { 
         status: 'playing', 
         impostorId: p[Math.floor(Math.random() * p.length)].id, 
