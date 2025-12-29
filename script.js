@@ -17,7 +17,7 @@ const extensions = ['jpg', 'png', 'jpeg', 'JPG', 'PNG'];
 async function createAvatarGrid() {
     selector.innerHTML = '';
     for (let i = 1; i <= 13; i++) {
-        if (i === 3) continue; 
+        if (i === 3) continue; // Saca la opción 3
         
         const img = document.createElement('img');
         img.className = 'avatar-opt';
@@ -180,7 +180,6 @@ document.getElementById('game-photo').addEventListener('change', async (e) => {
     if (currentUser.hasUploaded) return alert("Ya has cargado tu foto.");
     const f = e.target.files[0];
     if (!f) return;
-
     const r = new FileReader();
     r.onload = async (ev) => {
         const photoData = ev.target.result;
