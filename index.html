@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Impostor Game Online</title>
+    <title>Impostor - Juego Online de Fútbol y Estrategia</title>
+    <meta name="description" content="Juega a Impostor, el juego de estrategia inspirado en Among Us para fanáticos del fútbol. Encuentra al impostor entre las fotos de fútbol.">
+    <meta name="keywords" content="among us, impostor, fútbol, football, impostor fútbol, impostor football, juego online, multijugador, soccer impostor, quién es el impostor">
+    <meta name="author" content="Impostor Game">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -50,7 +53,7 @@
                 <button class="btn-start" onclick="startGame()">EMPEZAR JUEGO</button>
                 <p class="host-badge">👑 Host</p>
             </div>
-            <p id="waiting-msg">Esperando al administrador...</p>
+            <p id="waiting-msg" class="hidden">Esperando al host...</p>
         </section>
 
         <section id="game-screen" class="hidden">
@@ -77,7 +80,7 @@
             <div id="admin-game-actions" class="hidden">
                 <button class="btn-end" onclick="revealImpostor()">TERMINAR</button>
                 <div class="next-row">
-                    <button id="btn-next-img" class="btn-next disabled-action" onclick="nextImage()" disabled>Siguiente Imagen</button>
+                    <button id="btn-next-img" class="btn-next disabled-action" onclick="handleNextStep()" disabled>Siguiente Imagen</button>
                     <span id="image-stats">0/0</span>
                 </div>
             </div>

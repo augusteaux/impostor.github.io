@@ -3,7 +3,7 @@ const AVATAR_PATH = 'foto/';
 
 let currentUser = { 
     nick: '', 
-    photo: '', 
+    photo: 'foto/1.jpg', 
     isHost: false, 
     id: Math.random().toString(36).substr(2, 9),
     hasUploaded: false 
@@ -11,37 +11,44 @@ let currentUser = {
 
 let roomData = { pass: '', players: {}, photoQueue: [], currentIndex: 0, status: 'lobby', impostorId: '', revealed: false };
 
-// --- GENERADOR DE AVATARES ---
 const selector = document.getElementById('avatar-selector');
 const extensions = ['jpg', 'png', 'jpeg', 'JPG', 'PNG'];
-for (let i = 1; i <= 13; i++) {
-    const img = document.createElement('img');
-    img.className = 'avatar-opt';
-    let extIdx = 0;
-    const tryLoad = () => {
-        if (extIdx < extensions.length) {
-            img.src = `${AVATAR_PATH}${i}.${extensions[extIdx]}`;
-            extIdx++;
-        }
-    };
-    img.onerror = tryLoad;
-    tryLoad();
-    img.onclick = () => {
-        currentUser.photo = img.src;
-        document.getElementById('current-avatar').src = img.src;
-        selector.classList.add('hidden');
-    };
-    selector.appendChild(img);
+
+async function createAvatarGrid() {
+    selector.innerHTML = '';
+    for (let i = 1; i <= 13; i++) {
+        if (i === 3) continue; 
+        
+        const img = document.createElement('img');
+        img.className = 'avatar-opt';
+        
+        let extIdx = 0;
+        const tryLoad = () => {
+            if (extIdx < extensions.length) {
+                img.src = `${AVATAR_PATH}${i}.${extensions[extIdx]}`;
+                extIdx++;
+            }
+        };
+        img.onerror = tryLoad;
+        tryLoad();
+
+        img.onclick = () => {
+            currentUser.photo = img.src;
+            document.getElementById('current-avatar').src = img.src;
+            selector.classList.add('hidden');
+        };
+        selector.appendChild(img);
+    }
 }
+createAvatarGrid();
+
 window.toggleAvatarSelector = () => selector.classList.toggle('hidden');
 
-// --- NAVEGACIÓN ---
 window.goBack = () => {
     if (roomData.pass) window.fb.remove(window.fb.ref(window.fb.db, `rooms/${roomData.pass}/players/${currentUser.id}`));
     location.reload();
 };
 
-// --- ACCESO A SALA ---
 async function accessRoom(isCreating) {
     const pass = document.getElementById('room-pass').value;
     const nick = document.getElementById('nickname').value;
@@ -51,7 +58,7 @@ async function accessRoom(isCreating) {
     const snapshot = await window.fb.get(roomRef);
 
     if (isCreating) {
-        if (snapshot.exists()) return alert("Esta sala ya existe. Elige otra contraseña.");
+        if (snapshot.exists()) return alert("Esta sala ya existe.");
         await window.fb.set(roomRef, { pass, status: 'lobby', currentIndex: 0, revealed: false, photoQueue: ["none"] });
     } else {
         if (!snapshot.exists()) return alert("La sala no existe.");
@@ -105,11 +112,17 @@ function updateUI() {
             list.appendChild(card);
         });
 
-        if (currentUser.isHost) document.getElementById('host-controls').classList.remove('hidden');
+        const waitMsg = document.getElementById('waiting-msg');
+        if (currentUser.isHost) {
+            document.getElementById('host-controls').classList.remove('hidden');
+            waitMsg.classList.add('hidden');
+        } else {
+            document.getElementById('host-controls').classList.add('hidden');
+            waitMsg.classList.remove('hidden');
+        }
     }
 }
 
-// --- JUEGO ---
 function renderGame() {
     const isImp = (currentUser.id === roomData.impostorId);
     const queue = (roomData.photoQueue || []).filter(p => p !== "none");
@@ -130,6 +143,7 @@ function renderGame() {
         if (currentUser.isHost) {
             btnNext.disabled = false;
             btnNext.classList.remove('disabled-action');
+            btnNext.innerText = roomData.currentIndex >= queue.length - 1 ? "Cargar Imagen" : "Siguiente Imagen";
         }
     } else {
         card.classList.remove('flipped');
@@ -162,7 +176,6 @@ function renderVotes() {
 
 window.kick = (id) => window.fb.remove(window.fb.ref(window.fb.db, `rooms/${roomData.pass}/players/${id}`));
 
-// --- CARGA DE FOTO ---
 document.getElementById('game-photo').addEventListener('change', async (e) => {
     if (currentUser.hasUploaded) return alert("Ya has cargado tu foto.");
     const f = e.target.files[0];
@@ -171,20 +184,15 @@ document.getElementById('game-photo').addEventListener('change', async (e) => {
     const r = new FileReader();
     r.onload = async (ev) => {
         const photoData = ev.target.result;
-        const roomRef = window.fb.ref(window.fb.db, 'rooms/' + roomData.pass);
-        
-        // Obtenemos cola actual para evitar desincronización en PC
         const snap = await window.fb.get(window.fb.ref(window.fb.db, 'rooms/' + roomData.pass + '/photoQueue'));
         let queue = snap.val() || [];
         queue = queue.filter(x => x !== "none");
         queue.push(photoData);
-        
-        await window.fb.update(roomRef, { photoQueue: queue });
-
+        await window.fb.update(window.fb.ref(window.fb.db, 'rooms/' + roomData.pass), { photoQueue: queue });
         currentUser.hasUploaded = true;
         const btnUp = document.getElementById('btn-upload-ui');
         btnUp.className = "btn-upload-filled";
-        btnUp.innerText = "¡Foto Cargada!";
+        btnUp.innerText = "Foto cargada";
     };
     r.readAsDataURL(f);
 });
@@ -193,27 +201,21 @@ window.startGame = async () => {
     const queue = (roomData.photoQueue||[]).filter(x=>x!=="none");
     if (queue.length === 0) return alert("No hay fotos.");
     const p = Object.values(roomData.players);
-    
-    // IMPORTANTE: Resetear revealed a false al empezar
-    await window.fb.update(window.fb.ref(window.fb.db, 'rooms/' + roomData.pass), { 
-        status: 'playing', 
-        impostorId: p[Math.floor(Math.random() * p.length)].id, 
-        revealed: false,
-        currentIndex: 0
-    });
+    await window.fb.update(window.fb.ref(window.fb.db, 'rooms/' + roomData.pass), { status: 'playing', impostorId: p[Math.floor(Math.random() * p.length)].id, revealed: false, currentIndex: 0 });
 };
 
 window.revealImpostor = () => window.fb.update(window.fb.ref(window.fb.db, 'rooms/' + roomData.pass), { revealed: true });
 
-window.nextImage = async () => {
+window.handleNextStep = async () => {
     const queue = (roomData.photoQueue||[]).filter(x=>x!=="none");
     if (roomData.currentIndex < queue.length - 1) {
         const p = Object.values(roomData.players);
-        // IMPORTANTE: Resetear revealed a false al pasar de foto
-        await window.fb.update(window.fb.ref(window.fb.db, 'rooms/' + roomData.pass), { 
-            currentIndex: roomData.currentIndex + 1, 
-            revealed: false, 
-            impostorId: p[Math.floor(Math.random() * p.length)].id 
-        });
+        await window.fb.update(window.fb.ref(window.fb.db, 'rooms/' + roomData.pass), { currentIndex: roomData.currentIndex + 1, revealed: false, impostorId: p[Math.floor(Math.random() * p.length)].id });
+    } else {
+        await window.fb.update(window.fb.ref(window.fb.db, 'rooms/' + roomData.pass), { status: 'lobby', revealed: false, photoQueue: ["none"] });
+        currentUser.hasUploaded = false;
+        const btnUp = document.getElementById('btn-upload-ui');
+        btnUp.className = "btn-upload-empty";
+        btnUp.innerText = "Cargar Foto de la Ronda";
     }
 };
