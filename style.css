@@ -198,6 +198,12 @@ button {
     margin-top: 10px; 
 }
 
+/* Espacio entre perfiles y botón TERMINAR */
+#admin-game-actions {
+    margin-top: 30px;
+    width: 100%;
+}
+
 .btn-end { background: #da3633; color: white; width: 100%; padding: 12px; }
 .btn-next { background: #1f6feb; color: white; padding: 12px; flex: 1; }
 .disabled-action { opacity: 0.4; cursor: not-allowed !important; }

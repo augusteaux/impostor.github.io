@@ -40,10 +40,15 @@ createAvatarGrid();
 
 window.toggleAvatarSelector = () => document.getElementById('avatar-selector').classList.toggle('hidden');
 
+// --- LÓGICA DE SALA CORREGIDA ---
 window.goBack = async () => {
     if (roomData.pass) {
-        const path = currentUser.isHost ? `rooms/${roomData.pass}` : `rooms/${roomData.pass}/players/${currentUser.id}`;
-        await window.fb.remove(window.fb.ref(window.fb.db, path));
+        if (currentUser.isHost) {
+            // EL HOST BORRA LA SALA PARA QUE SE PUEDA REUSAR LA PASS
+            await window.fb.remove(window.fb.ref(window.fb.db, `rooms/${roomData.pass}`));
+        } else {
+            await window.fb.remove(window.fb.ref(window.fb.db, `rooms/${roomData.pass}/players/${currentUser.id}`));
+        }
     }
     location.reload();
 };
@@ -52,27 +57,45 @@ async function accessRoom(isCreating) {
     const pass = document.getElementById('room-pass').value;
     const nick = document.getElementById('nickname').value;
     if (!nick || pass.length < 4) return alert("Nickname y Pass (min 4)");
+    
     const roomRef = window.fb.ref(window.fb.db, 'rooms/' + pass);
     const snap = await window.fb.get(roomRef);
-    if (isCreating && snap.exists()) return alert("Sala ocupada");
-    if (!isCreating && !snap.exists()) return alert("Sala no existe");
+    
     if (isCreating) {
+        // SI LA SALA EXISTE, PERO ESTÁ VACÍA O SIN HOST, PERMITIR CREARLA (LIMPIANDO PREVIAMENTE)
+        if (snap.exists()) {
+            const data = snap.val();
+            const players = Object.values(data.players || {});
+            const hasActiveHost = players.some(p => p.isHost);
+            
+            if (hasActiveHost) return alert("Esta sala ya tiene un Host activo.");
+            // SI NO TIENE HOST ACTIVO, LA LIMPIAMOS PARA REUSARLA
+            await window.fb.remove(roomRef);
+        }
         await window.fb.set(roomRef, { pass, status: 'lobby', currentIndex: 0, revealed: false, photoQueue: ["none"] });
+    } else {
+        if (!snap.exists()) return alert("La sala no existe.");
     }
+
     currentUser.nick = nick;
     currentUser.isHost = isCreating;
     roomData.pass = pass;
+
     await window.fb.set(window.fb.ref(window.fb.db, `rooms/${pass}/players/${currentUser.id}`), {
         nick, photo: currentUser.photo, isHost: isCreating, id: currentUser.id, eliminated: false
     });
+
     window.fb.onValue(roomRef, (s) => {
         const data = s.val();
         if (!data || (data.players && !data.players[currentUser.id])) return location.reload();
+        
         if (data.status === 'lobby' && roomData.status === 'playing') {
             currentUser.hasUploaded = false;
-            document.getElementById('btn-upload-ui').className = "btn-upload-empty";
-            document.getElementById('btn-upload-ui').innerText = "CARGAR FOTO";
+            const btn = document.getElementById('btn-upload-ui');
+            btn.className = "btn-upload-empty";
+            btn.innerText = "CARGAR FOTO";
         }
+
         roomData = data;
         updateUI();
     });
@@ -108,29 +131,24 @@ function renderGame(players, queue) {
     const isImp = currentUser.id === roomData.impostorId;
     const photo = queue[roomData.currentIndex];
     const btnNext = document.getElementById('btn-next-img');
-    const roleEl = document.getElementById('role-text');
     const targetImg = document.getElementById('target-image');
-    const revealImg = document.getElementById('reveal-image');
-    const card = document.getElementById('game-card');
-
-    // Resetear giro SIEMPRE al iniciar o cambiar ronda para evitar parpadeos
+    
     if (!roomData.revealed) {
-        card.classList.remove('flipped');
+        document.getElementById('game-card').classList.remove('flipped');
     }
 
-    // Lógica prioritaria: Solo asignar imagen real si NO eres impostor
     if (isImp) {
         targetImg.src = IMPOSTOR_PATH;
     } else {
         targetImg.src = photo;
     }
     
-    revealImg.src = photo;
-    roleEl.innerText = isImp ? "IMPOSTOR" : "TRIPULANTE";
-    roleEl.style.color = isImp ? "#da3633" : "#1f6feb";
+    document.getElementById('reveal-image').src = photo;
+    document.getElementById('role-text').innerText = isImp ? "IMPOSTOR" : "TRIPULANTE";
+    document.getElementById('role-text').style.color = isImp ? "#da3633" : "#1f6feb";
     
     if (roomData.revealed) {
-        if (isImp) card.classList.add('flipped');
+        if (isImp) document.getElementById('game-card').classList.add('flipped');
         document.getElementById('revelation-zone').classList.remove('hidden');
         document.getElementById('impostor-announcement').innerText = `IMPOSTOR: ${roomData.players[roomData.impostorId]?.nick}`;
         if (currentUser.isHost) {
@@ -192,11 +210,7 @@ window.startGame = async () => {
     const shuffledQueue = shuffle([...queue]);
     const p = Object.values(roomData.players);
     await window.fb.update(window.fb.ref(window.fb.db, `rooms/${roomData.pass}`), { 
-        status: 'playing', 
-        impostorId: p[Math.floor(Math.random() * p.length)].id, 
-        revealed: false, 
-        currentIndex: 0,
-        photoQueue: shuffledQueue
+        status: 'playing', impostorId: p[Math.floor(Math.random() * p.length)].id, revealed: false, currentIndex: 0, photoQueue: shuffledQueue
     });
 };
 
@@ -207,16 +221,11 @@ window.handleNextStep = async () => {
     if (roomData.currentIndex < queue.length - 1) {
         const p = Object.values(roomData.players);
         await window.fb.update(window.fb.ref(window.fb.db, `rooms/${roomData.pass}`), { 
-            currentIndex: roomData.currentIndex + 1, 
-            revealed: false, 
-            impostorId: p[Math.floor(Math.random() * p.length)].id 
+            currentIndex: roomData.currentIndex + 1, revealed: false, impostorId: p[Math.floor(Math.random() * p.length)].id 
         });
     } else {
         await window.fb.update(window.fb.ref(window.fb.db, `rooms/${roomData.pass}`), { 
-            status: 'lobby', 
-            revealed: false, 
-            photoQueue: ["none"], 
-            currentIndex: 0 
+            status: 'lobby', revealed: false, photoQueue: ["none"], currentIndex: 0 
         });
     }
 };
