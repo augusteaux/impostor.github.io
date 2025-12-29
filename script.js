@@ -40,11 +40,9 @@ createAvatarGrid();
 
 window.toggleAvatarSelector = () => document.getElementById('avatar-selector').classList.toggle('hidden');
 
-// --- LÓGICA DE SALA CORREGIDA ---
 window.goBack = async () => {
     if (roomData.pass) {
         if (currentUser.isHost) {
-            // EL HOST BORRA LA SALA PARA QUE SE PUEDA REUSAR LA PASS
             await window.fb.remove(window.fb.ref(window.fb.db, `rooms/${roomData.pass}`));
         } else {
             await window.fb.remove(window.fb.ref(window.fb.db, `rooms/${roomData.pass}/players/${currentUser.id}`));
@@ -62,14 +60,11 @@ async function accessRoom(isCreating) {
     const snap = await window.fb.get(roomRef);
     
     if (isCreating) {
-        // SI LA SALA EXISTE, PERO ESTÁ VACÍA O SIN HOST, PERMITIR CREARLA (LIMPIANDO PREVIAMENTE)
         if (snap.exists()) {
             const data = snap.val();
             const players = Object.values(data.players || {});
             const hasActiveHost = players.some(p => p.isHost);
-            
             if (hasActiveHost) return alert("Esta sala ya tiene un Host activo.");
-            // SI NO TIENE HOST ACTIVO, LA LIMPIAMOS PARA REUSARLA
             await window.fb.remove(roomRef);
         }
         await window.fb.set(roomRef, { pass, status: 'lobby', currentIndex: 0, revealed: false, photoQueue: ["none"] });
@@ -91,9 +86,8 @@ async function accessRoom(isCreating) {
         
         if (data.status === 'lobby' && roomData.status === 'playing') {
             currentUser.hasUploaded = false;
-            const btn = document.getElementById('btn-upload-ui');
-            btn.className = "btn-upload-empty";
-            btn.innerText = "CARGAR FOTO";
+            document.getElementById('btn-upload-ui').className = "btn-upload-empty";
+            document.getElementById('btn-upload-ui').innerText = "CARGAR FOTO";
         }
 
         roomData = data;
@@ -132,9 +126,11 @@ function renderGame(players, queue) {
     const photo = queue[roomData.currentIndex];
     const btnNext = document.getElementById('btn-next-img');
     const targetImg = document.getElementById('target-image');
+    const card = document.getElementById('game-card');
     
+    // CORRECCIÓN: No girar si no está revelado, incluso si es impostor
     if (!roomData.revealed) {
-        document.getElementById('game-card').classList.remove('flipped');
+        card.classList.remove('flipped');
     }
 
     if (isImp) {
@@ -148,7 +144,8 @@ function renderGame(players, queue) {
     document.getElementById('role-text').style.color = isImp ? "#da3633" : "#1f6feb";
     
     if (roomData.revealed) {
-        if (isImp) document.getElementById('game-card').classList.add('flipped');
+        // Giro de carta solo tras REVELAR
+        if (isImp) card.classList.add('flipped');
         document.getElementById('revelation-zone').classList.remove('hidden');
         document.getElementById('impostor-announcement').innerText = `IMPOSTOR: ${roomData.players[roomData.impostorId]?.nick}`;
         if (currentUser.isHost) {

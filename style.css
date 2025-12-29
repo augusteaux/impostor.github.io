@@ -198,9 +198,8 @@ button {
     margin-top: 10px; 
 }
 
-/* Espacio entre perfiles y botón TERMINAR */
 #admin-game-actions {
-    margin-top: 30px;
+    margin-top: 40px;
     width: 100%;
 }
 
