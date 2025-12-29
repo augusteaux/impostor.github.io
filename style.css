@@ -1,4 +1,3 @@
-/* --- RESET Y ESTILOS GLOBALES --- */
 * { 
     box-sizing: border-box; 
     margin: 0; 
@@ -37,7 +36,6 @@ body {
     display: none !important; 
 }
 
-/* --- NAVEGACIÓN --- */
 .nav-header { 
     display: flex; 
     justify-content: flex-start; 
@@ -54,7 +52,6 @@ body {
     border: none; 
 }
 
-/* --- LOBBY HEADER --- */
 .lobby-header { 
     display: flex; 
     justify-content: space-between; 
@@ -76,7 +73,6 @@ body {
     border: 1px solid #30363d; 
 }
 
-/* --- PERFIL Y AVATAR --- */
 .profile-setup { 
     display: flex; 
     flex-direction: column; 
@@ -131,7 +127,6 @@ body {
     object-fit: cover; 
 }
 
-/* --- INPUTS Y BOTONES --- */
 input { 
     width: 100%; 
     padding: 12px; 
@@ -161,18 +156,17 @@ button {
 .btn-main { background: #238636; color: white; flex: 1; padding: 15px; }
 .btn-secondary { background: #30363d; color: white; flex: 1; padding: 15px; }
 
-/* --- LOBBY ESPECÍFICO --- */
 .lobby-divider { 
     border: 0; 
     border-top: 1px solid #30363d; 
     margin-top: 20px; 
-    margin-bottom: 25px; /* Espacio extra debajo de los perfiles */
+    margin-bottom: 25px; 
     width: 100%;
 }
 
 .upload-zone {
     width: 100%;
-    margin-bottom: 35px; /* Espacio extra antes del botón Empezar/Host */
+    margin-bottom: 35px; 
 }
 
 .btn-upload-empty { 
@@ -191,7 +185,7 @@ button {
 }
 
 #queue-count {
-    margin-top: 15px; /* Espacio entre botón de carga y su texto */
+    margin-top: 15px; 
     font-size: 0.5em;
     color: #8b949e;
 }
@@ -208,7 +202,6 @@ button {
 .btn-next { background: #1f6feb; color: white; padding: 12px; flex: 1; }
 .disabled-action { opacity: 0.4; cursor: not-allowed !important; }
 
-/* --- TARJETAS JUGADORES --- */
 #players-list, #vote-grid { 
     display: flex; 
     flex-wrap: wrap; 
@@ -257,7 +250,6 @@ button {
     font-size: 0.6em; 
 }
 
-/* --- JUEGO CARTAS --- */
 #role-text { 
     font-size: 0.7em; 
     margin-bottom: 15px; 

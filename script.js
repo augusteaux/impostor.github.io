@@ -61,20 +61,18 @@ async function accessRoom(isCreating) {
     }
     currentUser.nick = nick;
     currentUser.isHost = isCreating;
+    roomData.pass = pass;
     await window.fb.set(window.fb.ref(window.fb.db, `rooms/${pass}/players/${currentUser.id}`), {
         nick, photo: currentUser.photo, isHost: isCreating, id: currentUser.id, eliminated: false
     });
     window.fb.onValue(roomRef, (s) => {
         const data = s.val();
         if (!data || (data.players && !data.players[currentUser.id])) return location.reload();
-        
         if (data.status === 'lobby' && roomData.status === 'playing') {
             currentUser.hasUploaded = false;
-            const btn = document.getElementById('btn-upload-ui');
-            btn.className = "btn-upload-empty";
-            btn.innerText = "CARGAR FOTO";
+            document.getElementById('btn-upload-ui').className = "btn-upload-empty";
+            document.getElementById('btn-upload-ui').innerText = "CARGAR FOTO";
         }
-
         roomData = data;
         updateUI();
     });
@@ -110,25 +108,54 @@ function renderGame(players, queue) {
     const isImp = currentUser.id === roomData.impostorId;
     const photo = queue[roomData.currentIndex];
     const btnNext = document.getElementById('btn-next-img');
-    document.getElementById('target-image').src = isImp ? IMPOSTOR_PATH : photo;
-    document.getElementById('reveal-image').src = photo;
-    document.getElementById('role-text').innerText = isImp ? "IMPOSTOR" : "TRIPULANTE";
-    document.getElementById('role-text').style.color = isImp ? "#da3633" : "#1f6feb";
-    document.getElementById('game-card').classList.toggle('flipped', roomData.revealed && isImp);
-    document.getElementById('revelation-zone').classList.toggle('hidden', !roomData.revealed);
-    document.getElementById('impostor-announcement').innerText = `IMPOSTOR: ${roomData.players[roomData.impostorId]?.nick}`;
-    if (currentUser.isHost) {
-        document.getElementById('admin-game-actions').classList.remove('hidden');
-        document.getElementById('image-stats').innerText = `${roomData.currentIndex + 1}/${queue.length}`;
-        btnNext.disabled = !roomData.revealed;
-        btnNext.classList.toggle('disabled-action', !roomData.revealed);
-        btnNext.innerText = roomData.currentIndex >= queue.length - 1 ? "CARGAR" : "SIGUIENTE";
+    const roleEl = document.getElementById('role-text');
+    const targetImg = document.getElementById('target-image');
+    const revealImg = document.getElementById('reveal-image');
+    const card = document.getElementById('game-card');
+
+    // Resetear giro SIEMPRE al iniciar o cambiar ronda para evitar parpadeos
+    if (!roomData.revealed) {
+        card.classList.remove('flipped');
     }
+
+    // Lógica prioritaria: Solo asignar imagen real si NO eres impostor
+    if (isImp) {
+        targetImg.src = IMPOSTOR_PATH;
+    } else {
+        targetImg.src = photo;
+    }
+    
+    revealImg.src = photo;
+    roleEl.innerText = isImp ? "IMPOSTOR" : "TRIPULANTE";
+    roleEl.style.color = isImp ? "#da3633" : "#1f6feb";
+    
+    if (roomData.revealed) {
+        if (isImp) card.classList.add('flipped');
+        document.getElementById('revelation-zone').classList.remove('hidden');
+        document.getElementById('impostor-announcement').innerText = `IMPOSTOR: ${roomData.players[roomData.impostorId]?.nick}`;
+        if (currentUser.isHost) {
+            btnNext.disabled = false;
+            btnNext.classList.remove('disabled-action');
+            btnNext.innerText = roomData.currentIndex >= queue.length - 1 ? "CARGAR" : "SIGUIENTE";
+        }
+    } else {
+        document.getElementById('revelation-zone').classList.add('hidden');
+        if (currentUser.isHost) {
+            btnNext.disabled = true;
+            btnNext.classList.add('disabled-action');
+        }
+    }
+    
     document.getElementById('vote-grid').innerHTML = players.map(p => `
         <div class="player-card ${p.eliminated ? 'eliminated' : ''}" onclick="${currentUser.isHost ? `toggleElim('${p.id}', ${!p.eliminated})` : ''}">
             <img src="${p.photo}"><p>${p.nick}</p>
         </div>
     `).join('');
+
+    if (currentUser.isHost) {
+        document.getElementById('admin-game-actions').classList.remove('hidden');
+        document.getElementById('image-stats').innerText = `${roomData.currentIndex + 1}/${queue.length}`;
+    }
 }
 
 function shuffle(array) {
@@ -162,10 +189,8 @@ window.startGame = async () => {
     const snap = await window.fb.get(window.fb.ref(window.fb.db, `rooms/${roomData.pass}/photoQueue`));
     let queue = (snap.val() || []).filter(x => x !== "none");
     if (queue.length === 0) return alert("No hay fotos.");
-    
     const shuffledQueue = shuffle([...queue]);
     const p = Object.values(roomData.players);
-    
     await window.fb.update(window.fb.ref(window.fb.db, `rooms/${roomData.pass}`), { 
         status: 'playing', 
         impostorId: p[Math.floor(Math.random() * p.length)].id, 
