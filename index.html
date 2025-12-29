@@ -3,18 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Impostor - Juego Online de Fútbol</title>
-    <meta name="description" content="Juego de estrategia inspirado en Among Us con temática de fútbol. Encuentra al impostor.">
+    <title>Impostor - Fútbol y Estrategia</title>
+    <meta name="description" content="Juego de estrategia inspirado en Among Us con temática de fútbol. Encuentra al impostor entre las fotos de fútbol.">
     <meta name="keywords" content="among us, impostor, fútbol, football, impostor fútbol, impostor football, soccer impostor, quién es el impostor">
-    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-    
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
     <div class="container">
         <section id="setup-screen">
             <h1>Impostor</h1>
@@ -28,7 +25,7 @@
             </div>
             <div class="actions">
                 <div class="box">
-                    <input type="password" id="room-pass" placeholder="Contraseña de la sala">
+                    <input type="password" id="room-pass" placeholder="Password Sala">
                     <div class="double-btn">
                         <button class="btn-main" onclick="accessRoom(true)">Crear Sala</button>
                         <button class="btn-secondary" onclick="accessRoom(false)">Unirse</button>
@@ -42,19 +39,18 @@
                 <button class="btn-back" onclick="goBack()">← Volver</button>
             </div>
             <div class="lobby-header">
-                <h2>Sala: <span id="display-pass"></span></h2>
-                <div id="player-counter">Jugadores: 0</div>
+                <h2 class="room-title">Sala: <span id="display-pass"></span></h2>
+                <div id="player-counter">0/0</div>
             </div>
             <div id="players-list"></div>
             <hr>
             <div class="upload-zone">
-                <h3>Preparar Partida</h3>
                 <input type="file" id="game-photo" accept="image/*" style="display:none">
-                <button id="btn-upload-ui" class="btn-upload-empty" onclick="document.getElementById('game-photo').click()">Cargar Foto de la Ronda</button>
-                <div id="queue-count">Fotos cargadas: 0</div>
+                <button id="btn-upload-ui" class="btn-upload-empty" onclick="document.getElementById('game-photo').click()">Cargar Foto</button>
+                <div id="queue-count">Fotos: 0</div>
             </div>
             <div id="host-controls" class="hidden">
-                <button class="btn-start" onclick="startGame()">EMPEZAR JUEGO</button>
+                <button class="btn-start" onclick="startGame()">EMPEZAR</button>
                 <p class="host-badge">👑 Host</p>
             </div>
             <p id="waiting-msg" class="hidden">Esperando al host...</p>
@@ -69,11 +65,11 @@
                 <div id="game-card">
                     <div class="card-face front">
                         <img id="target-image" src="" alt="Juego">
-                        <p id="target-name">CARGANDO...</p>
+                        <p id="target-name">...</p>
                     </div>
                     <div class="card-face back">
                         <img id="reveal-image" src="" alt="Original">
-                        <p>FOTO REAL</p>
+                        <p>REAL</p>
                     </div>
                 </div>
             </div>
@@ -84,7 +80,7 @@
             <div id="admin-game-actions" class="hidden">
                 <button class="btn-end" onclick="revealImpostor()">TERMINAR</button>
                 <div class="next-row">
-                    <button id="btn-next-img" class="btn-next disabled-action" onclick="handleNextStep()" disabled>Siguiente Imagen</button>
+                    <button id="btn-next-img" class="btn-next disabled-action" onclick="handleNextStep()" disabled>Siguiente</button>
                     <span id="image-stats">0/0</span>
                 </div>
             </div>

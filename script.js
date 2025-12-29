@@ -17,11 +17,9 @@ const extensions = ['jpg', 'png', 'jpeg', 'JPG', 'PNG'];
 async function createAvatarGrid() {
     selector.innerHTML = '';
     for (let i = 1; i <= 13; i++) {
-        if (i === 3) continue; // Saca la opción 3
-        
+        if (i === 3) continue;
         const img = document.createElement('img');
         img.className = 'avatar-opt';
-        
         let extIdx = 0;
         const tryLoad = () => {
             if (extIdx < extensions.length) {
@@ -31,7 +29,6 @@ async function createAvatarGrid() {
         };
         img.onerror = tryLoad;
         tryLoad();
-
         img.onclick = () => {
             currentUser.photo = img.src;
             document.getElementById('current-avatar').src = img.src;
@@ -44,8 +41,14 @@ createAvatarGrid();
 
 window.toggleAvatarSelector = () => selector.classList.toggle('hidden');
 
-window.goBack = () => {
-    if (roomData.pass) window.fb.remove(window.fb.ref(window.fb.db, `rooms/${roomData.pass}/players/${currentUser.id}`));
+window.goBack = async () => {
+    if (roomData.pass) {
+        if (currentUser.isHost) {
+            await window.fb.remove(window.fb.ref(window.fb.db, `rooms/${roomData.pass}`));
+        } else {
+            await window.fb.remove(window.fb.ref(window.fb.db, `rooms/${roomData.pass}/players/${currentUser.id}`));
+        }
+    }
     location.reload();
 };
 
@@ -78,7 +81,10 @@ async function accessRoom(isCreating) {
 function listenToRoom(pass) {
     window.fb.onValue(window.fb.ref(window.fb.db, 'rooms/' + pass), (snap) => {
         const data = snap.val();
-        if (!data) return;
+        if (!data) {
+            if (roomData.pass) location.reload();
+            return;
+        }
         roomData = data;
         if (data.players && !data.players[currentUser.id]) return location.reload();
         updateUI();
@@ -98,10 +104,12 @@ function updateUI() {
         
         document.getElementById('display-pass').innerText = roomData.pass;
         const players = Object.values(roomData.players || {});
-        document.getElementById('player-counter').innerText = `Jugadores: ${players.length}`;
         
+        // Actualización del contador 0/0 (Jugadores actuales / Total cargado)
         const qCount = (roomData.photoQueue || []).filter(p => p !== "none").length;
-        document.getElementById('queue-count').innerText = `Fotos cargadas: ${qCount}`;
+        document.getElementById('player-counter').innerText = `${players.length}/${qCount}`;
+        
+        document.getElementById('queue-count').innerText = `Fotos: ${qCount}`;
 
         const list = document.getElementById('players-list');
         list.innerHTML = "";
@@ -130,7 +138,8 @@ function renderGame() {
     
     document.getElementById('target-image').src = isImp ? IMPOSTOR_PATH : photo;
     document.getElementById('reveal-image').src = photo;
-    document.getElementById('role-text').innerText = isImp ? "ERES EL IMPOSTOR" : "ERES TRIPULANTE";
+    document.getElementById('role-text').innerText = isImp ? "IMPOSTOR" : "TRIPULANTE";
+    document.getElementById('role-text').style.color = isImp ? "#da3633" : "#1f6feb";
     
     const card = document.getElementById('game-card');
     const btnNext = document.getElementById('btn-next-img');
@@ -138,12 +147,12 @@ function renderGame() {
     if (roomData.revealed) {
         if (isImp) card.classList.add('flipped');
         document.getElementById('revelation-zone').classList.remove('hidden');
-        document.getElementById('impostor-announcement').innerText = `EL IMPOSTOR ERA: ${roomData.players[roomData.impostorId]?.nick}`;
+        document.getElementById('impostor-announcement').innerText = `IMPOSTOR: ${roomData.players[roomData.impostorId]?.nick}`;
         
         if (currentUser.isHost) {
             btnNext.disabled = false;
             btnNext.classList.remove('disabled-action');
-            btnNext.innerText = roomData.currentIndex >= queue.length - 1 ? "Cargar Imagen" : "Siguiente Imagen";
+            btnNext.innerText = roomData.currentIndex >= queue.length - 1 ? "Cargar" : "Siguiente";
         }
     } else {
         card.classList.remove('flipped');
@@ -177,7 +186,7 @@ function renderVotes() {
 window.kick = (id) => window.fb.remove(window.fb.ref(window.fb.db, `rooms/${roomData.pass}/players/${id}`));
 
 document.getElementById('game-photo').addEventListener('change', async (e) => {
-    if (currentUser.hasUploaded) return alert("Ya has cargado tu foto.");
+    if (currentUser.hasUploaded) return alert("Ya cargaste tu foto.");
     const f = e.target.files[0];
     if (!f) return;
     const r = new FileReader();
@@ -203,18 +212,18 @@ window.startGame = async () => {
     await window.fb.update(window.fb.ref(window.fb.db, 'rooms/' + roomData.pass), { status: 'playing', impostorId: p[Math.floor(Math.random() * p.length)].id, revealed: false, currentIndex: 0 });
 };
 
-window.revealImpostor = () => window.fb.update(window.fb.ref(window.fb.db, 'rooms/' + roomData.pass), { revealed: true });
+window.revealImpostor = () => window.fb.update(window.fb.ref(window.fb.db, `rooms/${roomData.pass}`), { revealed: true });
 
 window.handleNextStep = async () => {
     const queue = (roomData.photoQueue||[]).filter(x=>x!=="none");
     if (roomData.currentIndex < queue.length - 1) {
         const p = Object.values(roomData.players);
-        await window.fb.update(window.fb.ref(window.fb.db, 'rooms/' + roomData.pass), { currentIndex: roomData.currentIndex + 1, revealed: false, impostorId: p[Math.floor(Math.random() * p.length)].id });
+        await window.fb.update(window.fb.ref(window.fb.db, `rooms/${roomData.pass}`), { currentIndex: roomData.currentIndex + 1, revealed: false, impostorId: p[Math.floor(Math.random() * p.length)].id });
     } else {
-        await window.fb.update(window.fb.ref(window.fb.db, 'rooms/' + roomData.pass), { status: 'lobby', revealed: false, photoQueue: ["none"] });
+        await window.fb.update(window.fb.ref(window.fb.db, `rooms/${roomData.pass}`), { status: 'lobby', revealed: false, photoQueue: ["none"], currentIndex: 0 });
         currentUser.hasUploaded = false;
         const btnUp = document.getElementById('btn-upload-ui');
         btnUp.className = "btn-upload-empty";
-        btnUp.innerText = "Cargar Foto de la Ronda";
+        btnUp.innerText = "Cargar Foto";
     }
 };

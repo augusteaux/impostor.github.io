@@ -2,12 +2,12 @@
     box-sizing: border-box; 
     margin: 0; 
     padding: 0; 
+    font-family: 'Press Start 2P', cursive;
 }
 
 body {
     background-color: #0b0e11;
     color: #ffffff;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     display: flex;
     justify-content: center;
     align-items: flex-start;
@@ -27,44 +27,48 @@ body {
 }
 
 h1 { 
-    font-family: 'Press Start 2P', cursive;
-    font-size: 1.8em; 
+    font-size: 1.5em; 
     letter-spacing: 2px; 
     color: #f0f6fc; 
     margin-bottom: 30px; 
     text-transform: uppercase;
-    line-height: 1.4;
+    line-height: 1.5;
 }
 
-.hidden { 
-    display: none !important; 
-}
-
-hr {
-    border: 0;
-    border-top: 1px solid #30363d;
-    margin: 20px 0;
-}
-
-.nav-header {
+.lobby-header {
     display: flex;
-    justify-content: flex-start;
-    margin-bottom: 15px;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
 }
+
+.room-title {
+    font-size: 0.6em !important;
+    text-align: left;
+}
+
+#player-counter {
+    font-size: 0.6em;
+    background: #0d1117;
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #30363d;
+}
+
+.hidden { display: none !important; }
+
+hr { border: 0; border-top: 1px solid #30363d; margin: 20px 0; }
+
+.nav-header { display: flex; justify-content: flex-start; margin-bottom: 15px; }
 
 .btn-back {
     background: #444c56;
     color: white;
-    padding: 10px 15px;
+    padding: 10px;
     border-radius: 8px;
-    font-size: 0.85em;
+    font-size: 0.6em;
     border: none;
     cursor: pointer;
-    transition: background 0.2s;
-}
-
-.btn-back:hover {
-    background: #57606a;
 }
 
 .profile-setup {
@@ -76,8 +80,8 @@ hr {
 
 .avatar-container {
     position: relative;
-    width: 100px;
-    height: 100px;
+    width: 90px;
+    height: 90px;
     margin-bottom: 15px;
     cursor: pointer;
 }
@@ -92,276 +96,101 @@ hr {
 
 .edit-badge {
     position: absolute;
-    bottom: 5px;
-    right: 5px;
+    bottom: 0;
+    right: 0;
     background: #238636;
-    width: 30px;
-    height: 30px;
+    width: 25px;
+    height: 25px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 16px;
+    font-size: 12px;
     border: 2px solid #1c2128;
 }
 
 #avatar-selector {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
+    gap: 8px;
     background: #0d1117;
-    padding: 15px;
+    padding: 10px;
     border-radius: 12px;
     margin-bottom: 15px;
-    max-height: 250px;
+    max-height: 200px;
     overflow-y: auto;
     border: 1px solid #30363d;
 }
 
-.avatar-opt {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    cursor: pointer;
-    border: 2px solid transparent;
-    object-fit: cover;
-    transition: border 0.2s;
-}
+.avatar-opt { width: 50px; height: 50px; border-radius: 50%; cursor: pointer; object-fit: cover; }
 
-.avatar-opt:hover {
-    border-color: #238636;
-}
-
-input[type="text"], 
-input[type="password"] {
-    width: 90%;
-    padding: 12px 15px;
-    margin: 8px 0;
+input {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
     border-radius: 8px;
     border: 1px solid #30363d;
     background: #0d1117;
     color: white;
-    font-size: 16px;
+    font-size: 0.6em;
+    text-align: center;
 }
 
-.box {
-    background: #21262d;
-    padding: 20px;
-    border-radius: 12px;
-    margin-top: 10px;
-}
+.double-btn { display: flex; gap: 10px; margin-top: 15px; }
 
-.double-btn {
-    display: flex;
-    gap: 10px;
-    margin-top: 15px;
-}
+button { cursor: pointer; border: none; border-radius: 8px; font-weight: bold; transition: 0.2s; font-size: 0.7em; }
 
-button {
-    cursor: pointer;
-    border: none;
-    border-radius: 8px;
-    font-weight: bold;
-    transition: all 0.4s ease;
-}
+.btn-main { background: #238636; color: white; flex: 1; padding: 15px 5px; }
+.btn-secondary { background: #30363d; color: white; flex: 1; padding: 15px 5px; }
 
-.btn-main { background: #238636; color: white; flex: 1; padding: 12px; }
-.btn-main:hover { background: #2ea043; }
+.btn-upload-empty { background: #30363d; color: #8b949e; padding: 12px; width: 100%; margin: 10px 0; border: 1px solid #444c56; }
+.btn-upload-filled { background: #1f6feb; color: white; padding: 12px; width: 100%; margin: 10px 0; border: 1px solid #1f6feb; }
 
-.btn-secondary { background: #30363d; color: white; flex: 1; padding: 12px; }
-.btn-secondary:hover { background: #3c444d; }
+.btn-start { background: #238636; color: white; width: 100%; padding: 18px; margin-top: 15px; }
+.btn-end { background: #da3633; color: white; width: 100%; padding: 12px; }
+.btn-next { background: #1f6feb; color: white; padding: 12px; flex: 1; }
+.disabled-action { background: #21262d !important; color: #484f58 !important; cursor: not-allowed !important; opacity: 0.6; }
 
-.btn-upload-empty {
-    background: #30363d;
-    color: #8b949e;
-    padding: 12px;
-    width: 100%;
-    margin: 10px 0;
-    border: 1px solid #444c56;
-}
-
-.btn-upload-filled {
-    background: #1f6feb;
-    color: white;
-    padding: 12px;
-    width: 100%;
-    margin: 10px 0;
-    border: 1px solid #1f6feb;
-    box-shadow: 0 0 15px rgba(31, 111, 235, 0.3);
-}
-
-.btn-start {
-    background: #238636;
-    color: white;
-    width: 100%;
-    padding: 15px;
-    font-size: 1.1em;
-    margin-top: 15px;
-}
-
-.btn-end {
-    background: #da3633;
-    color: white;
-    width: 100%;
-    padding: 12px;
-}
-
-.btn-next {
-    background: #1f6feb;
-    color: white;
-    padding: 12px;
-    flex: 1;
-}
-
-.disabled-action {
-    background: #21262d !important;
-    color: #484f58 !important;
-    cursor: not-allowed !important;
-    opacity: 0.6;
-    box-shadow: none !important;
-}
-
-.lobby-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-}
-
-#player-counter {
-    background: #0d1117;
-    padding: 5px 12px;
-    border-radius: 20px;
-    font-size: 0.9rem;
-}
-
-#players-list, #vote-grid {
-    display: flex;
-    flex-wrap: wrap; 
-    gap: 12px; 
-    justify-content: center; 
-    margin: 20px 0;
-}
+#players-list, #vote-grid { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin: 20px 0; }
 
 .player-card {
     position: relative;
     background: #30363d;
-    padding: 12px 10px;
+    padding: 10px;
     border-radius: 12px;
     width: 85px;
-}
-
-.player-card img {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    object-fit: cover;
-}
-
-.crown {
-    position: absolute;
-    top: -12px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 22px;
-}
-
-.kick-btn {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    cursor: pointer;
-    color: #f85149;
-    font-weight: bold;
-}
-
-.host-badge {
-    color: #e3b341;
-    font-weight: bold;
-    margin-top: 10px;
-    font-size: 0.9em;
-}
-
-.player-card.eliminated {
-    opacity: 0.2;
-    filter: grayscale(1);
-    transform: scale(0.9);
-}
-
-#game-card-container {
-    perspective: 1000px;
-    margin: 20px auto;
-    width: 280px;
-    height: 320px;
-}
-
-#game-card {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-    transform-style: preserve-3d;
-}
-
-#game-card.flipped {
-    transform: rotateY(180deg);
-}
-
-.card-face {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    backface-visibility: hidden;
-    border-radius: 15px;
-    overflow: hidden;
-    background: #262c36;
-    border: 3px solid #30363d;
-}
-
-.card-face.back {
-    transform: rotateY(180deg);
-    border-color: #238636;
-}
-
-.card-face img {
-    width: 100%;
-    height: 85%;
-    object-fit: cover;
-}
-
-.card-face p {
-    height: 15%;
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    font-size: 0.9em;
 }
 
-#revelation-zone {
-    margin: 20px 0;
-    padding: 12px;
-    background: rgba(248, 81, 73, 0.15);
-    border: 1px solid #f85149;
-    border-radius: 10px;
+.player-card img { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; margin-bottom: 8px; }
+
+.player-card p {
+    font-size: 0.45em;
+    width: 100%;
+    word-break: break-all;
+    text-align: center;
+    line-height: 1.2;
 }
 
-#impostor-announcement {
-    color: #ff7b72;
-    font-size: 1.1em;
-}
+.crown { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); font-size: 15px; }
+.kick-btn { position: absolute; top: 5px; right: 5px; cursor: pointer; color: #f85149; font-size: 0.8em; }
 
-.next-row {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    margin-top: 10px;
-}
+#game-card-container { perspective: 1000px; margin: 20px auto; width: 260px; height: 300px; }
+#game-card { position: relative; width: 100%; height: 100%; transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1); transform-style: preserve-3d; }
+#game-card.flipped { transform: rotateY(180deg); }
+.card-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 15px; overflow: hidden; background: #262c36; border: 3px solid #30363d; }
+.card-face.back { transform: rotateY(180deg); border-color: #238636; }
+.card-face img { width: 100%; height: 80%; object-fit: cover; }
+.card-face p { height: 20%; display: flex; align-items: center; justify-content: center; font-size: 0.5em; font-weight: bold; }
 
-#image-stats {
-    background: #0d1117;
-    padding: 10px 15px;
-    border-radius: 8px;
-    font-family: monospace;
-    border: 1px solid #30363d;
-}
+#revelation-zone { margin: 15px 0; padding: 12px; background: rgba(248, 81, 73, 0.15); border: 1px solid #f85149; border-radius: 10px; }
+#revelation-zone h3 { font-size: 0.55em; color: #ff7b72; line-height: 1.4; }
+
+.player-card.eliminated { opacity: 0.2; filter: grayscale(1); transform: scale(0.9); }
+.next-row { display: flex; gap: 10px; align-items: center; margin-top: 10px; }
+#image-stats { font-size: 0.5em; padding: 10px; border: 1px solid #30363d; border-radius: 8px; }
+#role-text { font-size: 0.8em; margin-bottom: 15px; }
+.host-badge { color: #e3b341; font-size: 0.6em; margin-top: 10px; }
+#waiting-msg { font-size: 0.5em; color: #8b949e; }
