@@ -7,7 +7,7 @@ let currentUser = {
     photo: 'foto/1.jpg', 
     isHost: false, 
     id: Math.random().toString(36).substr(2, 9),
-    hasUploaded: false 
+    uploadsCount: 0 
 };
 
 let roomData = {};
@@ -40,6 +40,14 @@ createAvatarGrid();
 
 window.toggleAvatarSelector = () => document.getElementById('avatar-selector').classList.toggle('hidden');
 
+window.copyRoomPass = () => {
+    if (roomData.pass) {
+        navigator.clipboard.writeText(roomData.pass).then(() => {
+            alert("Contrasena copiada: " + roomData.pass);
+        });
+    }
+};
+
 window.goBack = async () => {
     if (roomData.pass) {
         if (currentUser.isHost) {
@@ -64,7 +72,7 @@ async function accessRoom(isCreating) {
             const data = snap.val();
             const players = Object.values(data.players || {});
             const hasActiveHost = players.some(p => p.isHost);
-            if (hasActiveHost) return alert("Esta sala ya tiene un Host activo.");
+            if (hasActiveHost) return alert("Sala ocupada.");
             await window.fb.remove(roomRef);
         }
         await window.fb.set(roomRef, { pass, status: 'lobby', currentIndex: 0, revealed: false, photoQueue: ["none"] });
@@ -85,7 +93,7 @@ async function accessRoom(isCreating) {
         if (!data || (data.players && !data.players[currentUser.id])) return location.reload();
         
         if (data.status === 'lobby' && roomData.status === 'playing') {
-            currentUser.hasUploaded = false;
+            currentUser.uploadsCount = 0; 
             document.getElementById('btn-upload-ui').className = "btn-upload-empty";
             document.getElementById('btn-upload-ui').innerText = "CARGAR FOTO";
         }
@@ -100,12 +108,15 @@ function updateUI() {
     document.getElementById('setup-screen').classList.add('hidden');
     document.getElementById('lobby-screen').classList.toggle('hidden', isPlaying);
     document.getElementById('game-screen').classList.toggle('hidden', !isPlaying);
+    
     const players = Object.values(roomData.players || {});
     const queue = (roomData.photoQueue || []).filter(p => p !== "none");
+    
     if (!isPlaying) {
         document.getElementById('display-pass').innerText = roomData.pass;
-        document.getElementById('player-counter').innerText = `${players.length}/${queue.length}`;
+        document.getElementById('player-counter').innerText = players.length;
         document.getElementById('queue-count').innerText = `Fotos: ${queue.length}`;
+        
         const list = document.getElementById('players-list');
         list.innerHTML = players.map(p => `
             <div class="player-card">
@@ -128,7 +139,6 @@ function renderGame(players, queue) {
     const targetImg = document.getElementById('target-image');
     const card = document.getElementById('game-card');
     
-    // CORRECCIÓN: No girar si no está revelado, incluso si es impostor
     if (!roomData.revealed) {
         card.classList.remove('flipped');
     }
@@ -144,7 +154,6 @@ function renderGame(players, queue) {
     document.getElementById('role-text').style.color = isImp ? "#da3633" : "#1f6feb";
     
     if (roomData.revealed) {
-        // Giro de carta solo tras REVELAR
         if (isImp) card.classList.add('flipped');
         document.getElementById('revelation-zone').classList.remove('hidden');
         document.getElementById('impostor-announcement').innerText = `IMPOSTOR: ${roomData.players[roomData.impostorId]?.nick}`;
@@ -185,17 +194,24 @@ window.kick = (id) => window.fb.remove(window.fb.ref(window.fb.db, `rooms/${room
 window.toggleElim = (id, state) => window.fb.update(window.fb.ref(window.fb.db, `rooms/${roomData.pass}/players/${id}`), { eliminated: state });
 
 document.getElementById('game-photo').addEventListener('change', async (e) => {
-    if (currentUser.hasUploaded) return alert("Ya subiste foto");
+    if (currentUser.uploadsCount >= 2) return alert("Maximo 2 fotos.");
     const r = new FileReader();
     r.onload = async (ev) => {
         const snap = await window.fb.get(window.fb.ref(window.fb.db, `rooms/${roomData.pass}/photoQueue`));
         let queue = (snap.val() || []).filter(x => x !== "none");
         queue.push(ev.target.result);
         await window.fb.update(window.fb.ref(window.fb.db, `rooms/${roomData.pass}`), { photoQueue: queue });
-        currentUser.hasUploaded = true;
+        
+        currentUser.uploadsCount++;
         const btn = document.getElementById('btn-upload-ui');
-        btn.className = "btn-upload-filled";
-        btn.innerText = "FOTO LISTA";
+        
+        if (currentUser.uploadsCount === 1) {
+            btn.innerText = "OTRA (1/2)";
+            btn.className = "btn-upload-filled";
+        } else {
+            btn.innerText = "LISTO (2/2)";
+            btn.className = "btn-upload-filled";
+        }
     };
     r.readAsDataURL(e.target.files[0]);
 });

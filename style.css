@@ -38,8 +38,9 @@ body {
 
 .nav-header { 
     display: flex; 
-    justify-content: flex-start; 
-    margin-bottom: 10px; 
+    justify-content: space-between; 
+    align-items: center; 
+    margin-bottom: 20px; 
     width: 100%;
 }
 
@@ -50,11 +51,20 @@ body {
     border-radius: 5px; 
     font-size: 0.6em; 
     border: none; 
+    cursor: pointer;
+}
+
+#player-counter { 
+    font-size: 0.6em; 
+    background: #0d1117; 
+    padding: 8px 12px; 
+    border-radius: 5px; 
+    border: 1px solid #30363d; 
 }
 
 .lobby-header { 
     display: flex; 
-    justify-content: space-between; 
+    justify-content: center; 
     align-items: center; 
     margin-bottom: 20px; 
     width: 100%;
@@ -62,29 +72,42 @@ body {
 
 .room-title { 
     font-size: 0.5em !important; 
-    text-align: left; 
+    text-align: center;
+    cursor: pointer;
 }
 
-#player-counter { 
-    font-size: 0.6em; 
-    background: #0d1117; 
-    padding: 8px; 
-    border-radius: 5px; 
-    border: 1px solid #30363d; 
+.underline-pass {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+}
+
+.copy-icon {
+    font-size: 1.2em;
+    margin-left: 5px;
+    vertical-align: middle;
 }
 
 .profile-setup { 
     display: flex; 
     flex-direction: column; 
     align-items: center; 
-    margin-bottom: 20px; 
+    width: 100%;
 }
 
 .avatar-container { 
     position: relative; 
     width: 80px; 
     height: 80px; 
-    cursor: pointer; 
+    cursor: pointer;
+    margin-bottom: 15px;
+}
+
+#nickname {
+    margin-bottom: 15px !important;
+}
+
+#room-pass {
+    margin-bottom: 15px !important;
 }
 
 #current-avatar { 
@@ -118,6 +141,7 @@ body {
     border-radius: 12px; 
     max-height: 200px; 
     overflow-y: auto; 
+    margin-bottom: 15px;
 }
 
 .avatar-opt { 
@@ -130,13 +154,21 @@ body {
 input { 
     width: 100%; 
     padding: 12px; 
-    margin: 10px 0; 
+    margin: 0;
     border-radius: 8px; 
     border: 1px solid #30363d; 
     background: #0d1117; 
     color: white; 
     font-size: 0.5em; 
     text-align: center; 
+}
+
+.actions {
+    width: 100%;
+}
+
+.box {
+    width: 100%;
 }
 
 .double-btn { 
@@ -166,7 +198,7 @@ button {
 
 .upload-zone {
     width: 100%;
-    margin-bottom: 35px; 
+    margin-bottom: 20px;
 }
 
 .btn-upload-empty { 
@@ -185,9 +217,11 @@ button {
 }
 
 #queue-count {
-    margin-top: 15px; 
+    margin: 20px 0; 
     font-size: 0.5em;
     color: #8b949e;
+    width: 100%;
+    text-align: center;
 }
 
 .btn-start { 
@@ -195,7 +229,7 @@ button {
     color: white; 
     width: 100%; 
     padding: 18px; 
-    margin-top: 10px; 
+    margin-top: 0; 
 }
 
 #admin-game-actions {
@@ -210,35 +244,38 @@ button {
 #players-list, #vote-grid { 
     display: flex; 
     flex-wrap: wrap; 
-    gap: 10px; 
+    gap: 12px; 
     justify-content: center; 
     width: 100%;
 }
 
 .player-card { 
     background: #30363d; 
-    padding: 10px; 
+    padding: 12px; 
     border-radius: 10px; 
-    width: 80px; 
+    width: 95px; 
     display: flex; 
     flex-direction: column; 
     align-items: center; 
     position: relative; 
+    min-height: 100px;
 }
 
 .player-card img { 
-    width: 45px; 
-    height: 45px; 
+    width: 50px; 
+    height: 50px; 
     border-radius: 50%; 
     object-fit: cover; 
-    margin-bottom: 5px; 
+    margin-bottom: 8px; 
 }
 
 .player-card p { 
-    font-size: 0.4em; 
+    font-size: 0.42em; 
     width: 100%; 
-    word-break: break-all; 
+    word-wrap: break-word; 
+    overflow-wrap: break-word;
     text-align: center; 
+    line-height: 1.4;
 }
 
 .crown { 
@@ -314,7 +351,7 @@ button {
     padding: 10px; 
     background: rgba(248, 81, 73, 0.1); 
     border: 1px solid #f85149; 
-    border-radius: 8px; 
+    border-radius: 10px; 
     width: 100%;
 }
 

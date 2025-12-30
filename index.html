@@ -1,11 +1,18 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-KB2E7KXPZK"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-KB2E7KXPZK');
+    </script>
     <link rel="icon" type="image/png" href="impostor/alt_logo.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Impostor</title>
-    <meta name="description" content="Juego Among Us fútbol.">
+    <meta name="description" content="Juego Among Us futbol.">
     <meta name="keywords" content="among us, impostor, futbol, football, impostor futbol">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -22,11 +29,11 @@
                     <div class="edit-badge">✎</div>
                 </div>
                 <div id="avatar-selector" class="hidden"></div>
-                <input type="text" id="nickname" placeholder="Nickname">
+                <input type="text" id="nickname" placeholder="Nickname" maxlength="15">
             </div>
             <div class="actions">
                 <div class="box">
-                    <input type="password" id="room-pass" placeholder="Password">
+                    <input type="password" id="room-pass" placeholder="Password" maxlength="15">
                     <div class="double-btn">
                         <button class="btn-main" onclick="accessRoom(true)">CREAR</button>
                         <button class="btn-secondary" onclick="accessRoom(false)">UNIRSE</button>
@@ -36,10 +43,14 @@
         </section>
 
         <section id="lobby-screen" class="hidden">
-            <div class="nav-header"><button class="btn-back" onclick="goBack()">←</button></div>
+            <div class="nav-header">
+                <button class="btn-back" onclick="goBack()">←</button>
+                <div id="player-counter">0</div>
+            </div>
             <div class="lobby-header">
-                <h2 class="room-title">Sala: <span id="display-pass"></span></h2>
-                <div id="player-counter">0/0</div>
+                <h2 class="room-title" onclick="copyRoomPass()">
+                    Sala: <span id="display-pass" class="underline-pass"></span> <span class="copy-icon">❐</span>
+                </h2>
             </div>
             <div id="players-list"></div>
             <hr class="lobby-divider">
@@ -56,7 +67,9 @@
         </section>
 
         <section id="game-screen" class="hidden">
-            <div class="nav-header"><button class="btn-back" onclick="goBack()">←</button></div>
+            <div class="nav-header">
+                <button class="btn-back" onclick="goBack()">←</button>
+            </div>
             <h2 id="role-text"></h2>
             <div id="game-card-container">
                 <div id="game-card">
